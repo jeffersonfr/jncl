@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/jncl:/usr/local/lib:/usr/lib:/lib
+
+./src/formatter/tests/bin/test $1

@@ -1,0 +1,6 @@
+1. Algumas imagens transparentes ficam o background preto
+R. verifique se o depth em /etc/directfbrc eh igual a 32
+
+2. Problemas com a exibicao de elementos graficos
+R. Em jgfxhandler.cpp, foi adicionado DSCAPS_DOUBLE em CreateWindow()
+

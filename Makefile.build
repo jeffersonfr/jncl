@@ -1,0 +1,33 @@
+all: $(EXE)
+
+SRCS	+= $(addprefix src/,$(OBJS))
+
+$(EXE): $(SRCS)
+	@$(CC) $(CFLAGS) -o $(EXE) $(SRCS) $(LIBRARY)
+	@mkdir -p $(BINDIR) $(BINDIR) && mv $(EXE) $(BINDIR)
+
+.cpp.o: $<  
+	@$(CC) $(CFLAGS) -c $< -o $@ && $(ECHO) "Compiling $< ...  $(OK)" 
+
+strip:
+	@$(ECHO) "Strip $(EXE)...  $(OK)"
+	@$(STRIP) $(BINDIR)/$(EXE)
+
+doc:
+	@mkdir -p $(DOCDIR) 
+
+install:
+	@$(ECHO) "in $(PREFIX)/jncl/$(MODULE) ... "
+	@mkdir -p $(PREFIX)/jncl && install -o root -m 755 $(BINDIR)/$(EXE) $(PREFIX)/jncl &> /dev/null
+
+uninstall:
+	@$(ECHO) -n "Uninstalling $(MODULE)"
+	@rm $(INSTALL_DIR)/$(EXE)
+
+clean:
+	@rm -rf $(SRCS) *~ 2> /dev/null
+
+ultraclean: clean
+	@find -iname "*.o" -exec rm {} \;;
+	@rm -rf $(EXE) $(BINDIR) $(LIBDIR) $(DOCDIR) 2> /dev/null
+

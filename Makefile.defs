@@ -1,0 +1,46 @@
+STRIP			= strip
+
+DOXYGEN		= doxygen
+
+TARGET_ARCH = linux
+
+INCDIR		= ./src/include
+LIBDIR		= ./lib
+SRCDIR 		= ./src
+BINDIR 		= ./bin
+OBJDIR		= ./obj
+TESTDIR		= ./tests
+DOCDIR		= ./doc
+
+AR				= ar
+CC				= g++
+RANLIB		= ranlib
+JAVA			= javac
+
+PREFIX		= /usr/local/lib
+
+CFLAGS		+= \
+						 -Wall \
+						 -g -ggdb \
+						 -fPIC -funroll-loops -O2
+
+INCLUDE		+= \
+						 -I$(INCDIR) \
+						 `pkg-config --cflags jlibcpp` \
+						 `pkg-config --cflags fusionsound` \
+
+LIBRARY 	+= \
+						 -L$(LIBDIR) \
+						 `pkg-config --libs jlibcpp` \
+						 `pkg-config --libs fusionsound` \
+						 /usr/local/lib/liblua.a \
+
+DEFINES		+= \
+						 -DHAS_NCL \
+
+ARFLAGS		+= -rc
+CFLAGS		+= $(INCLUDE) $(DEFINES)
+
+OK 				= \033[30;32mOK\033[m
+
+ECHO			= echo -e
