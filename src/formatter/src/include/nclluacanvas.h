@@ -21,6 +21,7 @@
 #define NCLLUACANVAS_H
 
 #include "nclluaobjectbinding.h"
+
 #include "jimage.h"
 #include "jfont.h"
 #include "jframe.h"
@@ -35,7 +36,7 @@ class NCLLuaCanvasBinding {
 
 	private:
 		jgui::Window *_window;
-		jgui::Image *_img;
+		jgui::Image *_image;
 		jgui::Graphics *_graphics;
 		jgui::Font *_font;
 		jgui::jsize_t _size;
@@ -48,22 +49,17 @@ class NCLLuaCanvasBinding {
 		NCLLuaCanvasBinding(int xp, int yp, int wp, int hp);
 		NCLLuaCanvasBinding(std::string image, int width = -1, int height = -1);
 		NCLLuaCanvasBinding(int width, int height);
+
 		virtual ~NCLLuaCanvasBinding();
-
-		void SetFont(jgui::Font *font);
-
-		jgui::jsize_t GetSize();
-		jgui::Font * GetFont();
-		jgui::Graphics * GetGraphics();
-		jgui::Image * GetOffScreenImage();
 
 		static void Register(lua_State* L, int x, int y, int w, int h);
 	
 		static int _lua_create(lua_State *L);
 		static int _lua_gc(lua_State *L);
 
-		static int drawing(lua_State *L);
+		static int create(lua_State *L);
 		static int size(lua_State *L);
+		static int drawing(lua_State *L);
 		static int font(lua_State *L);
 		static int clip(lua_State *L);
 		static int color(lua_State *L);

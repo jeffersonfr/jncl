@@ -816,7 +816,7 @@ nclmimetype_t NCLHelper::GetMimeTypeByID(std::string id)
 		id = "audio/mp3";
 	} else if (id == "video") {
 		id = "video/mpeg";
-	} else if (id == "nclua") {
+	} else if (id == "lua" || id == "nclua") {
 		id = "application/x-ginga-nclua";
 	} else if (id == "nclet") {
 		id = "application/x-ginga-nclet";

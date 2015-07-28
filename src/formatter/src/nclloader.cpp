@@ -117,7 +117,7 @@ bool NCLLoader::InnerParser(std::string file)
 	jcommon::XmlDocument doc(file);
 
 	if (!doc.LoadFile()) {
-		JDEBUG(JERRO, "file \"%s\" is not a ncl document\n", file.c_str());
+		JDEBUG(JERROR, "file \"%s\" is not a ncl document\n", file.c_str());
 		
 		return false;
 	}
@@ -154,7 +154,7 @@ bool NCLLoader::InnerParserHead(jcommon::XmlElement *element)
 	jcommon::XmlElement *psg = element->FirstChildElement();
 
 	if (psg == NULL) {
-		JDEBUG(JERRO, "not children in head\n");
+		JDEBUG(JERROR, "not children in head\n");
 
 		return false;
 	}
@@ -173,7 +173,7 @@ bool NCLLoader::InnerParserHead(jcommon::XmlElement *element)
 		}
 
 		if (strcasecmp(psg->Value(), "compositerule") == 0) {
-			JDEBUG(JERRO, "<compositerule> parser not implemented\n");
+			JDEBUG(JERROR, "<compositerule> parser not implemented\n");
 		}
 	} while ((psg = psg->NextSiblingElement()) != NULL);
 
@@ -187,7 +187,7 @@ bool NCLLoader::InnerParserBody(jcommon::XmlElement *element)
 	JDEBUG(JINFO, "# begin\n");
 
 	if (element == NULL) {
-		JDEBUG(JERRO, "ncl document has no contexts\n");
+		JDEBUG(JERROR, "ncl document has no contexts\n");
 
 		return false;
 	}
@@ -325,7 +325,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 	}
 
 	if (context->HasChildren() == false) {
-		JDEBUG(JERRO, "link has no children\n");
+		JDEBUG(JERROR, "link has no children\n");
 
 		return false;
 	}
@@ -415,7 +415,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 			link->binds.push_back(bind);
 
 			if (elos->HasChildren() == false) {
-				// JDEBUG(JERRO, "bind has no params\n");
+				// JDEBUG(JERROR, "bind has no params\n");
 
 				continue;
 			}
@@ -634,7 +634,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 	}
 
 	if (element->HasChildren() == false) {
-		JDEBUG(JERRO, "regionbase has no children\n");
+		JDEBUG(JERROR, "regionbase has no children\n");
 
 		return false;
 	}
@@ -692,7 +692,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 			jcommon::XmlDocument doc(_enviroment->GetBaseDirectory() + "/" + documenturi);
 
 			if (!doc.LoadFile()) {
-				JDEBUG(JERRO, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
+				JDEBUG(JERROR, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
 
 				continue;
 			}
@@ -789,7 +789,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 	}
 
 	if (element->HasChildren() == false) {
-		JDEBUG(JERRO, "descriptorbase has no children\n");
+		JDEBUG(JERROR, "descriptorbase has no children\n");
 
 		return false;
 	}
@@ -829,7 +829,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 			jcommon::XmlDocument doc(_enviroment->GetBaseDirectory() + "/" + documenturi);
 
 			if (!doc.LoadFile()) {
-				JDEBUG(JERRO, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
+				JDEBUG(JERROR, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
 
 				continue;
 			}
@@ -977,7 +977,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 	}
 
 	if (element->HasChildren() == false) {
-		JDEBUG(JERRO, "connectorbase has no children\n");
+		JDEBUG(JERROR, "connectorbase has no children\n");
 
 		return false;
 	}
@@ -1019,7 +1019,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 			jcommon::XmlDocument doc(_enviroment->GetBaseDirectory() + "/" + documenturi);
 
 			if (!doc.LoadFile()) {
-				JDEBUG(JERRO, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
+				JDEBUG(JERROR, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
 
 				continue;
 			}
@@ -1043,7 +1043,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 
 		if (strcasecmp(connector->Value(), "causalconnector") == 0) {
 			if (element->HasChildren() == false) {
-				JDEBUG(JERRO, "connectorbase has no children\n");
+				JDEBUG(JERROR, "connectorbase has no children\n");
 
 				continue;
 			}
@@ -1059,7 +1059,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 			}
 
 			if (id == "") {
-				JDEBUG(JERRO, "connectorbase id not defined\n");
+				JDEBUG(JERROR, "connectorbase id not defined\n");
 
 				continue;
 			}
@@ -1129,7 +1129,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 					if (role == "") {
 						has_condition = false;
 
-						JDEBUG(JERRO, "simplecondition role not defined\n");
+						JDEBUG(JERROR, "simplecondition role not defined\n");
 
 						continue;
 					}
@@ -1214,7 +1214,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 					if (role == "") {
 						has_action = false;
 
-						JDEBUG(JERRO, "simpleaction role not defined\n");
+						JDEBUG(JERROR, "simpleaction role not defined\n");
 
 						continue;
 					}

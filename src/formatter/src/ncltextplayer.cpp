@@ -82,7 +82,7 @@ NCLTextPlayer::NCLTextPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_font = jgui::Font::CreateFont("fonts/font.ttf", jgui::JFA_NORMAL, _font_size);
 
-	_filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
+	// _filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
 
 	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
 
@@ -196,13 +196,13 @@ void NCLTextPlayer::Render()
 		text = jcommon::StringUtils::ToUpper(text);
 	}
 
-	if (g->DrawImage(_filename, 0, 0, width, height) == false) {
+	// if (g->DrawImage(_filename, 0, 0, width, height) == false) {
 		g->SetColor(_background);
 		g->FillRectangle(0, 0, width, height);
 		g->SetFont(_font);
 		g->SetColor(_font_color);
 		g->DrawString(text, 10, 10);
-	}
+	// }
 
 	g->Flip();
 }

@@ -27,20 +27,19 @@ CFLAGS		+= \
 INCLUDE		+= \
 						 -I$(INCDIR) \
 						 `pkg-config --cflags jlibcpp` \
-						 `pkg-config --cflags fusionsound` \
 
 LIBRARY 	+= \
 						 -L$(LIBDIR) \
 						 `pkg-config --libs jlibcpp` \
-						 `pkg-config --libs fusionsound` \
 						 /usr/local/lib/liblua.a \
 
 DEFINES		+= \
 						 -DHAS_NCL \
+						 -DJDEBUG_ENABLED \
 
 ARFLAGS		+= -rc
 CFLAGS		+= $(INCLUDE) $(DEFINES)
 
 OK 				= \033[30;32mOK\033[m
 
-ECHO			= echo -e
+ECHO			= echo

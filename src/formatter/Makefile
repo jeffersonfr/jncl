@@ -7,7 +7,7 @@ INCLUDE	= \
 					-I../tuner/src/include \
 					-I/usr/local/include/fusionsound \
 
-CFLAGS	+= -shared
+CFLAGS	+= -shared -fPIC
 
 OBJS 		= \
 					nclaudioplayer.o\

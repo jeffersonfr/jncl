@@ -33,78 +33,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
-}
-
-#define LUA_GLOBALSINDEX	100
-
-#define lua_boxpointer(L,u) \
-	        (*(void **)(lua_newuserdata(L, sizeof(void *))) = (u))
-
-#define lua_unboxpointer(L,i)   (*(void **)(lua_touserdata(L, i)))
-
-#define method(class, name) {#name, class::name}
-
 #define LUA_REENTRANT
 
-struct Smain {
-	int argc;
-	char **argv;
-	int status;
-};
-
-lua_State *globalL = NULL;
-
-static int traceback (lua_State *L) {
-	if (!lua_isstring(L, 1))  /* 'message' not a string? */
-		return 1;  /* keep it intact */
-	lua_getfield(L, LUA_GLOBALSINDEX, "debug");
-	if (!lua_istable(L, -1)) {
-		lua_pop(L, 1);
-		return 1;
-	}
-	lua_getfield(L, -1, "traceback");
-	if (!lua_isfunction(L, -1)) {
-		lua_pop(L, 2);
-		return 1;
-	}
-	lua_pushvalue(L, 1);  /* pass error message */
-	lua_pushinteger(L, 2);  /* skip this function and traceback */
-	lua_call(L, 2, 1);  /* call debug.traceback */
-	return 1;
+extern "C" {
+	#include "lua.h"
+	#include "lauxlib.h"
+	#include "lualib.h"
 }
-
-static void lstop (lua_State *L, lua_Debug *ar) {
-	(void)ar;  /* unused arg. */
-	lua_sethook(L, NULL, 0, 0);
-	luaL_error(L, "interrupted!");
-}
-
-static void laction (int i) 
-{
-	signal(i, SIG_DFL); // if another SIGINT happens before lstop, terminate process (default action) 
-	lua_sethook(globalL, lstop, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
-}
-
-static int docall (lua_State *L, int narg, int clear) 
-{
-	int status = -1;
-	int base = lua_gettop(L) - narg;  /* function index */
-	lua_pushcfunction(L, traceback);  /* push traceback function */
-	lua_insert(L, base);  /* put it under chunk and args */
-	signal(SIGINT, laction);
-	lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);
-	// lua_call(L, narg, (clear ? 0 : LUA_MULTRET));
-	signal(SIGINT, SIG_DFL);
-	lua_remove(L, base);  /* remove traceback function */
-	/* force a complete garbage collection in case of errors */
-	if (status != 0) lua_gc(L, LUA_GCCOLLECT, 0);
-	return status;
-}
-
 
 namespace jncl {
 
@@ -126,25 +61,22 @@ NCLLuaPlayer::NCLLuaPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
 	
-	lua_State *L = NULL;
+	_luaL = luaL_newstate();
 
-	L = luaL_newstate();
-
-	if (L == NULL) {
+	if (_luaL == NULL) {
 		return;
 	}
 
-	globalL = L;
-
-	luaL_openlibs(L);
+	luaL_openlibs(_luaL);
 
 	NCLLuaSettings::GetInstance()->SetProperty("lua.basedirectory", _enviroment->GetBaseDirectory() + "/");
 
-	NCLLuaEventBinding::Register(L);
-	NCLLuaCanvasBinding::Register(L, region->left+border, region->top+border, region->width+border, region->height+border);
+	NCLLuaEventBinding::Register(_luaL);
+	NCLLuaCanvasBinding::Register(_luaL, region->left+border, region->top+border, region->width+border, region->height+border);
 
-	lua_gc(L, LUA_GCSTOP, 0);	// stop collector during initialization 
-	lua_gc(L, LUA_GCRESTART, 0);
+	// stop collector during initialization 
+	lua_gc(_luaL, LUA_GCSTOP, 0);	
+	lua_gc(_luaL, LUA_GCRESTART, 0);
 
 	std::string path = _enviroment->GetBaseDirectory() + "/";
 
@@ -153,18 +85,17 @@ NCLLuaPlayer::NCLLuaPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	sprintf(tmp, "\nmath.randomseed(%d)\n", (int)time(NULL));
 
-	luaL_dostring(L, tmp);
+	luaL_dostring(_luaL, tmp);
 
 	// setting package.path
 	std::string package_path = "package.path = package.path .. ;" + path + "?.lua";
 
-	if (luaL_dostring(L, package_path.c_str()) != 0) {
-		lua_pop(L,1);
+	if (luaL_dostring(_luaL, package_path.c_str()) != 0) {
+		lua_pop(_luaL, 1);
 	}
 
-	// TODO:: usar chdir() em vez de mudar o codigo de lua
-
-	// setting io redirect
+	// INFO:: setting io redirect
+	// CHANGE :: usar chdir() em vez de mudar o codigo de lua
 	std::ostringstream o;
    
 	o << "require 'io'" << "\r\n" 
@@ -179,8 +110,8 @@ NCLLuaPlayer::NCLLuaPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 	  << "end" << "\r\n"
 	  << "set_basedirectory(\"" << path << "\")" << std::endl;
 	
-	if (luaL_dostring(L, o.str().c_str()) != 0) {
-		lua_pop(L,1);
+	if (luaL_dostring(_luaL, o.str().c_str()) != 0) {
+		lua_pop(_luaL, 1);
 	}
 }
 
@@ -188,43 +119,18 @@ NCLLuaPlayer::~NCLLuaPlayer()
 {
 }
 
-void NCLLuaPlayer::Hide()
-{
-	puts("NCLPlayer id=image hide\n");
-}
-
 void NCLLuaPlayer::Play()
 {
 	printf("NCLPlayer id=image src=%s play\n", _media->src.c_str());
 
-	if (luaL_loadfile(globalL, _filename.c_str()) == 0) {
-		// call method
-		if (docall(globalL, 0, 1) != 0) {
+	printf(":: %p\n", _luaL);
+	if (luaL_loadfile(_luaL, _filename.c_str()) == 0) {
+		if (lua_pcall(_luaL, 0, 0, 0) != 0) {
 			printf("NCLPlayer id=image src=%s play error\n", _media->src.c_str());
 		}
 	}
 
 	_is_alive = true;
-}
-
-void NCLLuaPlayer::Stop()
-{
-	printf("NCLPlayer id=image src=%s stop\n", _media->src.c_str());
-
-	_component->Hide();
-
-	lua_gc(globalL, LUA_GCCOLLECT, 0);
-	lua_close(globalL);
-
-	/* TODO:: resolver
-	media::VideoPlayer *player = controller::Controller::GetInstance()->GetVideoPlayer();
-
-	if (player != NULL) {
-		player->GetComponent()->SetBounds(0, 0, 1920, 1080);
-	}
-	*/
-
-	_is_alive = false;
 }
 
 void NCLLuaPlayer::Pause()
@@ -241,16 +147,29 @@ void NCLLuaPlayer::Resume()
 	Play();
 }
 
-void NCLLuaPlayer::Abort()
+void NCLLuaPlayer::Stop()
 {
-	puts("NCLPlayer id=image abort\n");
+	printf("NCLPlayer id=image src=%s stop\n", _media->src.c_str());
+
+	_component->Hide();
+
+	lua_gc(_luaL, LUA_GCCOLLECT, 0);
+	lua_close(_luaL);
+
+	/* TODO:: fix
+	media::VideoPlayer *player = controller::Controller::GetInstance()->GetVideoPlayer();
+
+	if (player != NULL) {
+		player->GetComponent()->SetBounds(0, 0, 1920, 1080);
+	}
+	*/
 
 	_is_alive = false;
 }
 
-void NCLLuaPlayer::Release()
+void NCLLuaPlayer::Close()
 {
-	puts("NCLPlayer id=image release\n");
+	puts("NCLPlayer id=image abort\n");
 
 	_is_alive = false;
 }

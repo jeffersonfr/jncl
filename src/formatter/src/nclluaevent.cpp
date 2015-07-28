@@ -26,8 +26,6 @@
 
 #include <sstream>
 
-extern lua_State *globalL;
-
 NCLLuaEventBinding::NCLLuaEventBinding()
 {
 	jncl::NCLInput::GetInstance()->RegisterEventListener(this);
@@ -120,6 +118,7 @@ void NCLLuaEventBinding::ActionPerformed(jncl::NCLEvent *nclevent)
 
 	if (symbol != "") {
 		for (std::vector<int>::iterator i=_handlers.begin(); i!=_handlers.end(); i++) {
+			/*
 			lua_rawgeti(globalL, LUA_REGISTRYINDEX, (*i));
 
 			lua_newtable(globalL);
@@ -139,6 +138,7 @@ void NCLLuaEventBinding::ActionPerformed(jncl::NCLEvent *nclevent)
 			printf("--> %d\n", lua_pcall(globalL, 1, 0, 0));
 
 			lua_pop(globalL, 1);
+			*/
 		}
 	}
 }

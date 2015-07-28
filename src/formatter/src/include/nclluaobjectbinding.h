@@ -17,28 +17,27 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef NCLLUAOBJECT_H
-#define NCLLUAOBJECT_H
+#ifndef NCLLUAOBJECTBINDING_H
+#define NCLLUAOBJECTBINDING_H
 
 #include <string>
 #include <map>
 
+#define LUA_LIB
+
 extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
+	#include "lua.h"
+	#include "lauxlib.h"
+	#include "lualib.h"
 }
 
 #define lua_boxpointer(L,u) \
-	        (*(void **)(lua_newuserdata(L, sizeof(void *))) = (u))
+	(*(void **)(lua_newuserdata(L, sizeof(void *))) = (u))
 
-#define lua_unboxpointer(L,i)   (*(void **)(lua_touserdata(L, i)))
-
-#define method(class, name) {#name, class::name}
+#define lua_unboxpointer(L,i) \
+	(*(void **)(lua_touserdata(L, i)))
 
 class NCLLuaObjectBinding{
-
-	private:
 
 	private:
 		NCLLuaObjectBinding();

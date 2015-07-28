@@ -11,7 +11,6 @@ LIBRARY	= \
 					-L../../demux/bin -ldemux \
 					-L../../tuner/bin -ltuner \
 					/usr/local/lib/liblua.a \
-					-lfusionsound \
 					-lxine \
 					-lssl \
 

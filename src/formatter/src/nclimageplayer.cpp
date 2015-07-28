@@ -46,6 +46,8 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
 
+	_image = jgui::Image::CreateImage(_filename);
+
 	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
 
 	_component->SetThemeEnabled(false);
@@ -62,6 +64,7 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 NCLImagePlayer::~NCLImagePlayer()
 {
+	delete _image;
 }
 
 void NCLImagePlayer::Hide()
@@ -139,9 +142,9 @@ void NCLImagePlayer::Render()
 	g->Reset();
 	g->Clear();
 	
-	g->SetPorterDuffFlags(jgui::JPF_SRC);
+	g->SetCompositeFlags(jgui::JCF_SRC);
 
-	if (g->DrawImage(_filename, 0, 0, width, height) == false) {
+	if (g->DrawImage(_image, 0, 0, width, height) == false) {
 		g->SetColor(0x00, 0x00, 0x00, 0xff);
 		g->FillRectangle(0, 0, width, height);
 	}

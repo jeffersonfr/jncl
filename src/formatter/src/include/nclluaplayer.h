@@ -20,6 +20,7 @@
 #ifndef J_NCLLUAPLAYER_H
 #define J_NCLLUAPLAYER_H
 
+#include "nclluaobjectbinding.h"
 #include "nclplayer.h"
 #include "nclenviroment.h"
 
@@ -38,6 +39,7 @@ namespace jncl {
 class NCLLuaPlayer : public NCLPlayer{
 
 	private:
+		lua_State *_luaL;
 		NCLEnviroment *_enviroment;
 		std::string _filename;
 
@@ -45,15 +47,11 @@ class NCLLuaPlayer : public NCLPlayer{
 		NCLLuaPlayer(NCLEnviroment *env, struct nclmedia_t *media);
 		virtual ~NCLLuaPlayer();
 
-		virtual void Hide();
-
 		virtual void Play();
-		virtual void Stop();
 		virtual void Pause();
 		virtual void Resume();
-		virtual void Abort();
-
-		virtual void Release();
+		virtual void Stop();
+		virtual void Close();
 
 };
 

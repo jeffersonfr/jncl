@@ -29,7 +29,6 @@
 #include <vector>
 #include <map>
 
-#include <fusionsound.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -56,15 +55,11 @@ class AudioPlayer : public Player{
 		AudioPlayer(tuner::Locator *mrl);
 
 	public:
-		IFusionSound *sound;
-		IFusionSoundMusicProvider *provider;
-		IFusionSoundStream *stream;
-		IFusionSoundPlayback *playback;
 		std::string _mrl;
 		double _volume;
-		bool _loop,
-			 _mute,
-			 _alive;
+		bool _loop;
+		bool _mute;
+		bool _alive;
 
 	public:
 		virtual ~AudioPlayer();
@@ -76,22 +71,16 @@ class AudioPlayer : public Player{
 		void Dispose();
 		void Forward();
 		void Rewind();
-		
 		int GetLength();
-		
 		void SetMediaTime(int i);
 		int GetMediaTime();
-		
 		void SetVolume(int i);
 		int GetVolume();
-		
 		void SetLoop(bool b);
 		void SetMute(bool b);
-		
 		bool IsLoop();
 		bool IsMute();
-		
-  		void GetTrackDescription(struct audio_track_t *t);
+  	void GetTrackDescription(struct audio_track_t *t);
 
 };
 

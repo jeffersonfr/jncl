@@ -59,7 +59,7 @@ class NCLInput : public jgui::KeyListener{
 		void RemoveEventListener(NCLEventListener *listener);
 		void DispatchEvent(NCLEvent *event);
 
-		virtual void KeyPressed(jgui::KeyEvent *event);
+		virtual bool KeyPressed(jgui::KeyEvent *event);
 
 };
 

@@ -64,7 +64,7 @@ Source::Source(jthread::IndexedBuffer *b)
 
 int Source::read(char *data, int size)
 {
-	jthread::jringbuffer_t t;
+	jthread::jbuffer_chunk_t t;
 	int r, 
 			d = _packet_max - _packet_index;
 
@@ -83,10 +83,10 @@ int Source::read(char *data, int size)
 	_packet_index = 0;
 	_packet_max = 0;
 
-	r = buffer->Read(&t, &_read_index, &_pass_index);
+	r = buffer->Read(&t);
 
 	if (r < 0) {
-		buffer->GetIndex(&_read_index, &_pass_index);
+		buffer->GetIndex(&t);
 	} else {
 		memcpy(_packet, t.data, t.size);
 

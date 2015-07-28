@@ -164,7 +164,9 @@ void FileTuner::Scan()
 	_channels.clear();
 
 	jio::File file(_directory);
-	std::vector<std::string> files = file.ListFiles();
+	std::vector<std::string> files;
+	
+	file.ListFiles(&files);
 
 	for (std::vector<std::string>::iterator i=files.begin(); i!=files.end(); i++) {
 		std::string s = (*i);

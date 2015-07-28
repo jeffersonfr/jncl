@@ -25,15 +25,40 @@
 
 #include <directfb.h>
 
+const char NCLLuaCanvasBinding::className[] = "canvas";
+
+const luaL_Reg NCLLuaCanvasBinding::methods[] = {
+	{"create", NCLLuaCanvasBinding::create},
+	{"drawing", NCLLuaCanvasBinding::drawing},
+	{"clip", NCLLuaCanvasBinding::clip},
+	{"color", NCLLuaCanvasBinding::color},
+	{"pixel", NCLLuaCanvasBinding::pixel},
+	{"attrFont", NCLLuaCanvasBinding::font},
+	{"measureText", NCLLuaCanvasBinding::measuretext},
+	{"drawLine", NCLLuaCanvasBinding::line},
+	{"drawArc", NCLLuaCanvasBinding::arc},
+	{"drawCircle", NCLLuaCanvasBinding::circle},
+	{"drawEllipse", NCLLuaCanvasBinding::ellipse},
+	{"drawRect", NCLLuaCanvasBinding::drawRect},
+	{"drawTriangule", NCLLuaCanvasBinding::triangle},
+	{"drawPolygon", NCLLuaCanvasBinding::polygon},
+	{"drawImage", NCLLuaCanvasBinding::drawimage},
+	{"clearRect", NCLLuaCanvasBinding::clear},
+	{"flush", NCLLuaCanvasBinding::flush},
+	{"compose", NCLLuaCanvasBinding::compose},
+	{"drawText", NCLLuaCanvasBinding::drawstring},
+	{"size", NCLLuaCanvasBinding::size},
+	{0, 0}
+};
+
 NCLLuaCanvasBinding::NCLLuaCanvasBinding(int xp, int yp, int wp, int hp)
 {
-	_img = NULL;
+	_image = NULL;
 	_font = NULL;
 	
-	_size.width = wp;
-	_size.height = hp;
-	
 	_window = new jgui::Window(xp, yp, wp, hp);
+
+	_size = _window->GetSize();
 
 	_window->SetBorder(jgui::JCB_EMPTY);
 	_window->SetBackgroundVisible(false);
@@ -46,74 +71,49 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(std::string image, int wp, int hp)
 {
 	image = NCLLuaSettings::GetInstance()->GetProperty("lua.basedirectory") + image;
 
-	_img = NULL;
-	_graphics = NULL;
+	_image = NULL;
 	_font = NULL;
+	_window = NULL;
+	_graphics = NULL;
 
-	_size.width = 0;
-	_size.height = 0;
+	jgui::jsize_t isize = jgui::Image::GetImageSize(image);
 
-	IDirectFB *engine = (IDirectFB *)jgui::GFXHandler::GetInstance()->GetGraphicEngine();
-	IDirectFBImageProvider *provider = NULL;
-	DFBSurfaceDescription desc;
-
-	if (engine->CreateImageProvider(engine, image.c_str(), &provider) != DFB_OK) {
-		return;
+	if (wp <= 0) {
+		wp = isize.width;
 	}
 
-	if (provider->GetSurfaceDescription (provider, &desc) != DFB_OK) {
-		return;
+	if (hp <= 0) {
+		hp = isize.height;
 	}
 
 	_size.width = wp;
-
-	if (wp <= 0) {
-		wp = SCREEN_TO_SCALE(desc.width, jgui::GFXHandler::GetInstance()->GetScreenWidth(), DEFAULT_SCALE_WIDTH);
-	}
-
 	_size.height = hp;
 
-	if (hp <= 0) {
-		hp = SCREEN_TO_SCALE(desc.height, jgui::GFXHandler::GetInstance()->GetScreenHeight(), DEFAULT_SCALE_HEIGHT);
-	}
-
-	_img = jgui::Image::CreateImage(wp, hp);
-
-	_graphics = _img->GetGraphics();
-
-	provider->Release(provider);
-
-	_graphics->SetPorterDuffFlags(jgui::JPF_NONE);
-	_graphics->SetBlittingFlags(jgui::JBF_ALPHACHANNEL);
-
-	_graphics->DrawImage(image, 0, 0, wp, hp);
+	_image = jgui::Image::CreateImage(image);
 }
 
 NCLLuaCanvasBinding::NCLLuaCanvasBinding(int wp, int hp)
 {
-	_img = NULL;
+	_image = NULL;
 	_font = NULL;
+	_window = NULL;
+	_graphics = NULL;
 
-	if (wp <= 0) {
-		wp = 1;
+	if (wp < 0 || hp < 0) {
+		return;
 	}
 
-	if (hp <= 0) {
-		hp = 1;
-	}
-
-	_img = jgui::Image::CreateImage(wp, hp);
-
-	_graphics = _img->GetGraphics();
-	
 	_size.width = wp;
 	_size.height = hp;
+
+	_image = jgui::Image::CreateImage(jgui::JPF_ARGB, wp, hp);
+	_graphics = _image->GetGraphics();
 }
 
 NCLLuaCanvasBinding::~NCLLuaCanvasBinding()
 {
-	if (_img != NULL) {
-		delete _img;
+	if (_image != NULL) {
+		delete _image;
 	}
 
 	if (_window != NULL) {
@@ -121,86 +121,52 @@ NCLLuaCanvasBinding::~NCLLuaCanvasBinding()
 	}
 }
 
-jgui::jsize_t NCLLuaCanvasBinding::GetSize()
-{
-	return _size;
-}
-
-jgui::Graphics * NCLLuaCanvasBinding::GetGraphics()
-{
-	return _graphics;
-}
-
-jgui::Image * NCLLuaCanvasBinding::GetOffScreenImage()
-{
-	return _img;
-}
-
-jgui::Font * NCLLuaCanvasBinding::GetFont()
-{
-	if (_font != NULL) {
-		return _font;
-	}
-
-	return jgui::Font::GetDefaultFont();
-}
-
 void NCLLuaCanvasBinding::Register(lua_State* L, int x, int y, int w, int h) 
 {
-	lua_newtable(L);                 int methodtable = lua_gettop(L);
-	luaL_newmetatable(L, className); int metatable   = lua_gettop(L);
-
-	lua_pushliteral(L, "__metatable");
-	lua_pushvalue(L, methodtable);
-	lua_settable(L, metatable);  // hide metatable from NCLLua getmetatable()
-
-	lua_pushliteral(L, "__index");
-	lua_pushvalue(L, methodtable);
-	lua_settable(L, metatable);
-
-	lua_pushliteral(L, "__gc");
-	lua_pushcfunction(L, _lua_gc);
-	lua_settable(L, metatable);
-
-	lua_pop(L, 1);  // drop metatable
-
-	// luaL_register(L, 0, methods);  // fill methodtable
-	// luaL_register(L, className, methods);  // fill methodtable
-
-	lua_pop(L, 1);  // drop methodtable
-
-	// lua_register(L, className, _lua_create);
+	luaL_requiref(L, className, _lua_create, 1);
 	
-	NCLLuaCanvasBinding *c = new NCLLuaCanvasBinding(x, y, w, h);
-
-	lua_boxpointer(L, c);
-	luaL_getmetatable(L, className);
-	lua_setmetatable(L, -2);
+	lua_boxpointer(L, new NCLLuaCanvasBinding(x, y, w, h));
 	lua_setglobal(L, className);
+	
+	lua_pop(L, 1);
 }
 
 int NCLLuaCanvasBinding::_lua_create(lua_State *L)
 {
+	luaL_newlib(L, methods);
+
+	return 1;
+}
+
+int NCLLuaCanvasBinding::_lua_gc(lua_State *L)
+{
+	// NCLLuaCanvasBinding *a = (NCLLuaCanvasBinding *)lua_unboxpointer(L, 1);
+
+	return 0;
+}
+
+int NCLLuaCanvasBinding::create(lua_State *L)
+{
 	NCLLuaCanvasBinding *c = NULL;
 
-	if (lua_type(L, 1) == LUA_TNUMBER) {
+	if (lua_gettop(L) == 1) {
+			const char *image = (const char *)luaL_checkstring(L, 1);
+		
+		c = new NCLLuaCanvasBinding(image);
+	} else if (lua_gettop(L) == 2) {
 		int w = (int)luaL_checknumber(L, 1),
-			h = (int)luaL_checknumber(L, 2);
+				h = (int)luaL_checknumber(L, 2);
 		
 		c = new NCLLuaCanvasBinding(w, h);
-	} else if (lua_type(L, 1) == LUA_TSTRING) {
-		if (lua_type(L, 2) == LUA_TNUMBER && lua_type(L, 3) == LUA_TNUMBER) {
-			const char *img = (const char *)luaL_checkstring(L, 1);
-			int w = (int)luaL_checknumber(L, 2),
+	} else if (lua_gettop(L) == 3) {
+		const char *img = (const char *)luaL_checkstring(L, 1);
+		int w = (int)luaL_checknumber(L, 2),
 				h = (int)luaL_checknumber(L, 3);
 		
-			c = new NCLLuaCanvasBinding(img, w, h);
-		} else {
-			const char *img = (const char *)luaL_checkstring(L, 1);
-		
-			c = new NCLLuaCanvasBinding(img);
-		}
-	} else {
+		c = new NCLLuaCanvasBinding(img, w, h);
+	}
+
+	if (c == NULL) {
 		return 0;
 	}
 
@@ -211,25 +177,14 @@ int NCLLuaCanvasBinding::_lua_create(lua_State *L)
 	return 1;
 }
 
-int NCLLuaCanvasBinding::_lua_gc(lua_State *L)
-{
-	NCLLuaCanvasBinding *a = (NCLLuaCanvasBinding *)lua_unboxpointer(L, 1);
-
-	// delete a;
-
-	return 0;
-}
-
 int NCLLuaCanvasBinding::size(lua_State *L)
 {
 	//jthread::AutoLock lock(&NCLLuaEventBinding::event_mutex);
 
-	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
-
-	jgui::jsize_t size = a->GetSize();
-
-	lua_pushnumber(L, size.width);
-	lua_pushnumber(L, size.height);
+	lua_getglobal(L, className);
+	
+	//lua_pushnumber(L, a->_size.width);
+	//lua_pushnumber(L, a->_size.height);
 
 	return 2;
 }
@@ -239,6 +194,8 @@ int NCLLuaCanvasBinding::font(lua_State *L)
 	//jthread::AutoLock lock(&NCLLuaEventBinding::event_mutex);
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
+	
+	// return jgui::Font::GetDefaultFont();
 
 	if (lua_type(L, 2) == LUA_TSTRING) {
 		/* TODO::
@@ -258,10 +215,10 @@ int NCLLuaCanvasBinding::font(lua_State *L)
 		}
 		*/
 	} else {
-		jgui::Font *font = a->GetFont();
+		jgui::Font *font = a->_font;
 
 		lua_pushstring(L, font->GetName().c_str());
-		lua_pushnumber(L, font->GetHeight());
+		lua_pushnumber(L, font->GetSize());
 
 		return 2;
 	}
@@ -275,7 +232,7 @@ int NCLLuaCanvasBinding::clip(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -285,9 +242,9 @@ int NCLLuaCanvasBinding::clip(lua_State *L)
 			w = (int)luaL_checknumber(L, 4),
 			h = (int)luaL_checknumber(L, 5);
 
-		a->GetGraphics()->SetClip(x, y, w, h);
+		a->_graphics->SetClip(x, y, w, h);
 	} else {
-		jgui::jregion_t t = a->GetGraphics()->GetClip();
+		jgui::jregion_t t = a->_graphics->GetClip();
 
 		lua_pushnumber(L, t.x);
 		lua_pushnumber(L, t.y);
@@ -306,7 +263,7 @@ int NCLLuaCanvasBinding::color(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -316,7 +273,7 @@ int NCLLuaCanvasBinding::color(lua_State *L)
 			b1 = (int)luaL_checknumber(L, 4),
 			a1 = (int)luaL_checknumber(L, 5);
 
-			a->GetGraphics()->SetColor(r1, g1, b1, a1);
+			a->_graphics->SetColor(r1, g1, b1, a1);
 	} else if (lua_type(L, 2) == LUA_TSTRING) {
 		const char *name = (char*)luaL_checkstring(L, 2);
 		uint32_t color = jncl::NCLHelper::ParseColor(name);
@@ -325,9 +282,9 @@ int NCLLuaCanvasBinding::color(lua_State *L)
 			b1 = (color>>0)&0xff,
 			a1 = (color>>24)&0xff;
 
-		a->GetGraphics()->SetColor(r1, g1, b1, a1);
+		a->_graphics->SetColor(r1, g1, b1, a1);
 	} else {
-		jgui::Color color = a->GetGraphics()->GetColor();
+		jgui::Color color = a->_graphics->GetColor();
 
 		lua_pushnumber(L, color.GetRed());
 		lua_pushnumber(L, color.GetGreen());
@@ -346,18 +303,16 @@ int NCLLuaCanvasBinding::drawing(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
 	const char *type = (const char *)luaL_checkstring(L, 2);
 
 	if (strcmp(type, "blend") == 0) {
-		a->GetGraphics()->SetDrawingFlags(jgui::JDF_BLEND);
-		a->GetGraphics()->SetBlittingFlags(jgui::JBF_ALPHACHANNEL);
+		a->_graphics->SetCompositeFlags(jgui::JCF_SRC_OVER);
 	} else if (strcmp(type, "none") == 0) {
-		a->GetGraphics()->SetDrawingFlags(jgui::JDF_NOFX);
-		a->GetGraphics()->SetBlittingFlags(jgui::JBF_NOFX);
+		a->_graphics->SetCompositeFlags(jgui::JCF_SRC);
 	}
 
 	return 0;
@@ -369,11 +324,11 @@ int NCLLuaCanvasBinding::measuretext(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
-	IDirectFBFont *font = (IDirectFBFont *)a->GetFont()->GetNativeFont();
+	IDirectFBFont *font = (IDirectFBFont *)a->_font->GetNativeFont();
 	DFBRectangle rect;
 
 	font->GetStringExtents(font, (const char *)luaL_checkstring(L, 2), -1, NULL, &rect);
@@ -397,12 +352,12 @@ int NCLLuaCanvasBinding::pixel(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
 	if (lua_gettop(L) > 2) {
-		jgui::Color color = a->GetGraphics()->GetColor();
+		jgui::Color color = a->_graphics->GetColor();
 
 		int x = (int)luaL_checknumber(L, 2),
 				y = (int)luaL_checknumber(L, 3);
@@ -411,9 +366,9 @@ int NCLLuaCanvasBinding::pixel(lua_State *L)
 				b1 = (int)luaL_checknumber(L, 6),
 				a1 = (int)luaL_checknumber(L, 7);
 
-		a->GetGraphics()->SetColor(r1, g1, b1, a1);
-		a->GetGraphics()->DrawLine(x, y, x, y);
-		a->GetGraphics()->SetColor(color);
+		a->_graphics->SetColor(r1, g1, b1, a1);
+		a->_graphics->DrawLine(x, y, x, y);
+		a->_graphics->SetColor(color);
 	} else {
 		IDirectFBSurface *surface = NULL;
 		DFBSurfacePixelFormat format;
@@ -428,7 +383,7 @@ int NCLLuaCanvasBinding::pixel(lua_State *L)
 			bytes,
 			pitch;
 
-		surface = (IDirectFBSurface *)a->GetGraphics()->GetNativeSurface();
+		surface = (IDirectFBSurface *)a->_graphics->GetNativeSurface();
 
 		surface->GetSize(surface, &sx, &sy);
 		surface->GetPixelFormat(surface, &format);
@@ -476,7 +431,7 @@ int NCLLuaCanvasBinding::line(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -485,7 +440,7 @@ int NCLLuaCanvasBinding::line(lua_State *L)
 		x2 = (int)luaL_checknumber(L, 4),
 		y2 = (int)luaL_checknumber(L, 5);
 
-	a->GetGraphics()->DrawLine(x1, y1, x2, y2);
+	a->_graphics->DrawLine(x1, y1, x2, y2);
 
 	return 0;
 }
@@ -496,7 +451,7 @@ int NCLLuaCanvasBinding::arc(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -509,9 +464,9 @@ int NCLLuaCanvasBinding::arc(lua_State *L)
 		   end = (double)luaL_checknumber(L, 8);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->GetGraphics()->FillArc(x, y, rx, ry, start, end);
+		a->_graphics->FillArc(x, y, rx, ry, start, end);
 	} else {
-		a->GetGraphics()->DrawArc(x, y, rx, ry, start, end);
+		a->_graphics->DrawArc(x, y, rx, ry, start, end);
 	}
 
 	return 0;
@@ -523,7 +478,7 @@ int NCLLuaCanvasBinding::circle(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -533,9 +488,9 @@ int NCLLuaCanvasBinding::circle(lua_State *L)
 		r = (int)luaL_checknumber(L, 5);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->GetGraphics()->FillCircle(x, y, r);
+		a->_graphics->FillCircle(x, y, r);
 	} else {
-		a->GetGraphics()->DrawCircle(x, y, r);
+		a->_graphics->DrawCircle(x, y, r);
 	}
 
 	return 0;
@@ -547,7 +502,7 @@ int NCLLuaCanvasBinding::ellipse(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -558,9 +513,9 @@ int NCLLuaCanvasBinding::ellipse(lua_State *L)
 		ry = (int)luaL_checknumber(L, 6);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->GetGraphics()->FillArc(x, y, rx, ry, 0, 360);
+		a->_graphics->FillArc(x, y, rx, ry, 0, 360);
 	} else {
-		a->GetGraphics()->DrawArc(x, y, rx, ry, 0, 360);
+		a->_graphics->DrawArc(x, y, rx, ry, 0, 360);
 	}
 
 	return 0;
@@ -572,7 +527,7 @@ int NCLLuaCanvasBinding::drawRect(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -583,9 +538,9 @@ int NCLLuaCanvasBinding::drawRect(lua_State *L)
 		h = (int)luaL_checknumber(L, 6);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->GetGraphics()->FillRectangle(x, y, w, h);
+		a->_graphics->FillRectangle(x, y, w, h);
 	} else {
-		a->GetGraphics()->DrawRectangle(x, y, w, h);
+		a->_graphics->DrawRectangle(x, y, w, h);
 	}
 
 	return 0;
@@ -597,7 +552,7 @@ int NCLLuaCanvasBinding::triangle(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
 
@@ -611,9 +566,9 @@ int NCLLuaCanvasBinding::triangle(lua_State *L)
 
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->GetGraphics()->FillTriangle(p1x, p1y, p2x, p2y, p3x, p3y);
+		a->_graphics->FillTriangle(p1x, p1y, p2x, p2y, p3x, p3y);
 	} else {
-		a->GetGraphics()->DrawTriangle(p1x, p1y, p2x, p2y, p3x, p3y);
+		a->_graphics->DrawTriangle(p1x, p1y, p2x, p2y, p3x, p3y);
 	}
 
 	return 0;
@@ -642,9 +597,9 @@ int NCLLuaCanvasBinding::polygon(lua_State *L)
 		}
 
 		if (strcasecmp(type, "fill") == 0) {
-			a->GetGraphics()->FillPolygon(x, y, p, length);
+			a->_graphics->FillPolygon(x, y, p, length);
 		} else {
-			a->GetGraphics()->DrawPolygon(x, y, p, length, true);
+			a->_graphics->DrawPolygon(x, y, p, length, true);
 		}
 	}
 	
@@ -658,12 +613,9 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() == NULL) {
+	if (a->_graphics == NULL) {
 		return 0;
 	}
-
-	a->GetGraphics()->SetPorterDuffFlags(jgui::JPF_NONE);
-	a->GetGraphics()->SetBlittingFlags(jgui::JBF_ALPHACHANNEL);
 
 	if (lua_gettop(L) == 4) { 
 		const char *img = (const char *)luaL_checkstring(L, 2);
@@ -671,7 +623,11 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 			y = (int)luaL_checknumber(L, 4);
 
 		if (img != NULL) {
-			a->GetGraphics()->DrawImage(img, x, y);
+			jgui::Image *image = jgui::Image::CreateImage(img);
+
+			a->_graphics->DrawImage(image, x, y);
+
+			delete image;
 		}
 	} else if (lua_gettop(L) == 6) {
 		const char *img = (const char *)luaL_checkstring(L, 2);
@@ -681,7 +637,11 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 			h = (int)luaL_checknumber(L, 6);
 
 		if (img != NULL) {
-			a->GetGraphics()->DrawImage(img, x, y, w, h);
+			jgui::Image *image = jgui::Image::CreateImage(img);
+
+			a->_graphics->DrawImage(image, x, y, w, h);
+
+			delete image;
 		}
 	} else if (lua_gettop(L) == 10) {
 		const char *img = (const char *)luaL_checkstring(L, 2);
@@ -695,7 +655,11 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 			sh = (int)luaL_checknumber(L, 10);
 
 		if (img != NULL) {
-			a->GetGraphics()->DrawImage(img, sx, sy, sw, sh, x, y, w, h);
+			jgui::Image *image = jgui::Image::CreateImage(img);
+
+			a->_graphics->DrawImage(image, sx, sy, sw, sh, x, y, w, h);
+
+			delete image;
 		}
 	}
 
@@ -709,24 +673,17 @@ int NCLLuaCanvasBinding::clear(lua_State *L)
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
 	if (lua_gettop(L) == 1) {
-		if (a->GetGraphics() != NULL) {
-			a->GetGraphics()->Clear();
+		if (a->_graphics != NULL) {
+			a->_graphics->Clear();
 		}
 	} else if (lua_gettop(L) == 5) {
 		int x = (int)luaL_checknumber(L, 2),
-			y = (int)luaL_checknumber(L, 3),
-			w = (int)luaL_checknumber(L, 4),
-			h = (int)luaL_checknumber(L, 5);
+				y = (int)luaL_checknumber(L, 3),
+				w = (int)luaL_checknumber(L, 4),
+				h = (int)luaL_checknumber(L, 5);
 
-		if (a->GetGraphics() != NULL) {
-			jgui::Color color = a->GetGraphics()->GetColor();
-
-			a->GetGraphics()->SetDrawingFlags(jgui::JDF_NOFX);
-			a->GetGraphics()->SetPorterDuffFlags(jgui::JPF_NONE);
-			a->GetGraphics()->SetBlittingFlags(jgui::JBF_ALPHACHANNEL);
-			a->GetGraphics()->SetColor(0x00, 0x00, 0x00, 0x00);
-			a->GetGraphics()->FillRectangle(x, y, w, h);
-			a->GetGraphics()->SetColor(color);
+		if (a->_graphics != NULL) {
+			a->_graphics->Clear(x, y, w, h);
 		}
 	}
 
@@ -739,8 +696,8 @@ int NCLLuaCanvasBinding::flush(lua_State *L)
 
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
-	if (a->GetGraphics() != NULL) {
-		a->GetGraphics()->Flip();
+	if (a->_graphics != NULL) {
+		a->_graphics->Flip();
 	}
 
 	return 0;
@@ -763,18 +720,18 @@ int NCLLuaCanvasBinding::compose(lua_State *L)
 		y = (int)luaL_checknumber(L, 3);
 
 	if (c1 != NULL) {
-		g1 = c1->GetGraphics();
+		g1 = c1->_graphics;
 	}
 
 	if (c2 != NULL) {
-		g2 = c2->GetGraphics();
+		g2 = c2->_graphics;
 	}
 
 	if (g1 == NULL || g2 == NULL) {
 		return 0;
 	}
 
-	jgui::Image *img = c2->GetOffScreenImage();
+	jgui::Image *img = c2->_image;
 
 	if (lua_type(L, 5) == LUA_TNUMBER && lua_type(L, 6) == LUA_TNUMBER && 
 			lua_type(L, 7) == LUA_TNUMBER && lua_type(L, 8) == LUA_TNUMBER) {
@@ -806,14 +763,14 @@ int NCLLuaCanvasBinding::drawstring(lua_State *L)
 	int x = (int)luaL_checknumber(L, 3),
 		y = (int)luaL_checknumber(L, 4);
 
-	if (a->GetGraphics() != NULL) {
+	if (a->_graphics != NULL) {
 		if (lua_gettop(L) == 4) {
-			a->GetGraphics()->DrawString(std::string(text), x, y);
+			a->_graphics->DrawString(std::string(text), x, y);
 		} else if (lua_gettop(L) == 6) {
 			int w = (int)luaL_checknumber(L, 5),
 				h = (int)luaL_checknumber(L, 6);
 
-			a->GetGraphics()->DrawString(std::string(text), x, y, w, h);//, 0);
+			a->_graphics->DrawString(std::string(text), x, y, w, h);//, 0);
 		} else if (lua_gettop(L) == 7) {
 			int w = (int)luaL_checknumber(L, 5),
 				h = (int)luaL_checknumber(L, 6);
@@ -831,38 +788,10 @@ int NCLLuaCanvasBinding::drawstring(lua_State *L)
 				align = jgui::JHA_JUSTIFY;
 			}
 
-			a->GetGraphics()->DrawString(std::string(text), x, y, w, h, align);
+			a->_graphics->DrawString(std::string(text), x, y, w, h, align);
 		}
 	}
 
 	return 0;
 }
-
-const char NCLLuaCanvasBinding::className[] = "canvas";
-
-#define method(class, name) {#name, class::name}
-
-const luaL_Reg NCLLuaCanvasBinding::methods[] = {
-	{"new", NCLLuaCanvasBinding::_lua_create},
-	{"drawing", NCLLuaCanvasBinding::drawing},
-	{"attrClip", NCLLuaCanvasBinding::clip},
-	{"attrColor", NCLLuaCanvasBinding::color},
-	{"pixel", NCLLuaCanvasBinding::pixel},
-	{"attrFont", NCLLuaCanvasBinding::font},
-	{"measureText", NCLLuaCanvasBinding::measuretext},
-	{"drawLine", NCLLuaCanvasBinding::line},
-	{"drawArc", NCLLuaCanvasBinding::arc},
-	{"drawCircle", NCLLuaCanvasBinding::circle},
-	{"drawEllipse", NCLLuaCanvasBinding::ellipse},
-	{"drawRect", NCLLuaCanvasBinding::drawRect},
-	{"drawTriangule", NCLLuaCanvasBinding::triangle},
-	{"drawPolygon", NCLLuaCanvasBinding::polygon},
-	{"drawImage", NCLLuaCanvasBinding::drawimage},
-	{"drawClear", NCLLuaCanvasBinding::clear},
-	{"flush", NCLLuaCanvasBinding::flush},
-	{"compose", NCLLuaCanvasBinding::compose},
-	{"drawText", NCLLuaCanvasBinding::drawstring},
-	{"attrSize", NCLLuaCanvasBinding::size},
-	{0, 0}
-};
 

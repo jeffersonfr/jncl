@@ -110,13 +110,15 @@ void NCLInput::DispatchEvent(NCLEvent *event)
 	delete event;
 }
 
-void NCLInput::KeyPressed(jgui::KeyEvent *event)
+bool NCLInput::KeyPressed(jgui::KeyEvent *event)
 {
 	if (event->GetType() != jgui::JKT_PRESSED) {
-		return;
+		return false;
 	}
 
 	DispatchEvent(new NCLSelectionEvent(NCLHelper::TranslateKey(event->GetSymbol())));
+
+	return false;
 }
 
 }

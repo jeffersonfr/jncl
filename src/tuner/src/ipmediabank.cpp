@@ -23,6 +23,8 @@
 #include "jsocketoptions.h"
 #include "jthread.h"
 
+#include <unistd.h>
+
 namespace tuner {
 
 unsigned char null_packet [188]= {
@@ -132,7 +134,7 @@ int IPMediaBank::AddData(char *data, int size)
 
 int IPMediaBank::GetData(char *data, int size)
 {
-	jthread::jringbuffer_t t;
+	jthread::jbuffer_chunk_t t;
 	int r,
 			d = _packet_max - _packet_index;
 
@@ -151,10 +153,10 @@ int IPMediaBank::GetData(char *data, int size)
 	_packet_index = 0;
 	_packet_max = 0;
 
-	r = _buffer->Read(&t, &_read_index, &_pass_index);
+	r = _buffer->Read(&t);
 
 	if (r < 0) {
-		_buffer->GetIndex(&_read_index, &_pass_index);
+		_buffer->GetIndex(&t);
 	} else {
 		memcpy(_packet, t.data, t.size);
 

@@ -111,7 +111,7 @@ VideoPlayer::VideoPlayer(tuner::Locator *mrl)
 	_mute = false;
 
 	_component = new VideoComponent(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-	_offscreen = jgui::Image::CreateImage(VIDEO_WIDTH, VIDEO_HEIGHT);
+	_offscreen = jgui::Image::CreateImage(jgui::JPF_ARGB, VIDEO_WIDTH, VIDEO_HEIGHT);
 	
 	((VideoComponent *)_component)->SetOffScreenImage(_offscreen);
 
@@ -144,8 +144,8 @@ VideoPlayer::VideoPlayer(tuner::Locator *mrl)
 
 	cx = 0;
 	cy = 0;
-	cw = SCALE_TO_SCREEN(320, _screen_width, _scale_width);
-	ch = SCALE_TO_SCREEN(240, _screen_height, _scale_height);
+	cw = 320;
+	ch = 240;
 
 	IDirectFBSurface *surface = NULL;
 	dfb_visual_t visual;
@@ -340,8 +340,12 @@ void VideoPlayer::Run()
 			index = index + r;
 			
 			if (index >= 7*188) {
-				write(fd, buf, index);
+				int w = write(fd, buf, index);
 				
+				if (w <= 0) {
+					sleep(1);
+				}
+
 				index = 0;
 			}
 		}
@@ -807,8 +811,8 @@ void output_cb( void *cdata, int width, int height, double ratio, DFBSurfacePixe
 
 	dst->x = 0;
 	dst->y = 0;
-	dst->w = SCALE_TO_SCREEN(VIDEO_WIDTH, data->screen_width, DEFAULT_SCALE_WIDTH);
-	dst->h = SCALE_TO_SCREEN(VIDEO_HEIGHT, data->screen_height, DEFAULT_SCALE_HEIGHT);
+	dst->w = VIDEO_WIDTH;
+	dst->h = VIDEO_HEIGHT;
 }
 
 void frame_cb( void *cdata )

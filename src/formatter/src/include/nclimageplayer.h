@@ -22,6 +22,7 @@
 
 #include "nclenviroment.h"
 #include "nclplayer.h"
+#include "jimage.h"
 
 #include <string>
 #include <vector>
@@ -39,6 +40,7 @@ class NCLImagePlayer : public NCLPlayer{
 
 	private:
 		NCLEnviroment *_enviroment;
+		jgui::Image *_image;
 		std::string _filename;
 
 	public:
