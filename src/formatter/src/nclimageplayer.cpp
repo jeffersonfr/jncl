@@ -50,9 +50,10 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
 
-	_component->SetThemeEnabled(false);
+	_theme.SetBorder("window", jgui::JCB_EMPTY);
+
+	_component->SetTheme(&_theme);
 	_component->SetBackgroundVisible(false);
-	_component->SetBorder(jgui::JCB_EMPTY);
 	_component->SetUndecorated(true);
 	
 	for (std::vector<struct nclparam_t>::iterator i=media->params.begin(); i!=media->params.end(); i++) {

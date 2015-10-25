@@ -86,9 +86,10 @@ NCLTextPlayer::NCLTextPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
 
-	_component->SetThemeEnabled(false);
+	_theme.SetBorder("window", jgui::JCB_EMPTY);
+
+	_component->SetTheme(&_theme);
 	_component->SetBackgroundVisible(false);
-	_component->SetBorder(jgui::JCB_EMPTY);
 	_component->SetUndecorated(true);
 }
 
@@ -105,7 +106,6 @@ void NCLTextPlayer::Play()
 {
 	printf("NCLPlayer id=text src=%s play\n", _media->src.c_str());
 
-	_component->SetBorder(jgui::JCB_EMPTY);
 	_component->Show(false);
 
 	Render();

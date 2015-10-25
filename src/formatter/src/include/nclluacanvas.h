@@ -39,6 +39,7 @@ class NCLLuaCanvasBinding {
 		jgui::Image *_image;
 		jgui::Graphics *_graphics;
 		jgui::Font *_font;
+		jgui::Theme _theme;
 		jgui::jsize_t _size;
 
 	public:

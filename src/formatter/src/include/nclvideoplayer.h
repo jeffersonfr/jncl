@@ -41,6 +41,7 @@ class NCLVideoPlayer : public NCLPlayer{
 	private:
 		NCLEnviroment *_enviroment;
 		media::Player *_player;
+		jgui::Theme _theme;
 		bool _is_video_layer;
 
 	public:

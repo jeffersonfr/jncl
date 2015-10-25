@@ -64,9 +64,10 @@ NCLVideoPlayer::NCLVideoPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 		_component = new jgui::Window(left, top, width, height);
 	
-		_component->SetThemeEnabled(false);
+		_theme.SetBorder("window", jgui::JCB_EMPTY);
+
+		_component->SetTheme(&_theme);
 		_component->SetBackgroundVisible(false);
-		_component->SetBorder(jgui::JCB_EMPTY);
 		_component->SetUndecorated(true);
 
 		_player = media::PlayerManager::GetInstance()->CreatePlayer(locator);

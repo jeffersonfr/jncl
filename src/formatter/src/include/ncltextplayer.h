@@ -40,14 +40,17 @@ class NCLTextPlayer : public NCLPlayer{
 	private:
 		NCLEnviroment *_enviroment;
 		jgui::Font *_font;
-		std::string _filename,
+		jgui::Theme _theme;
+		std::string 
+			_filename,
 			_font_family,
 			_font_style,
 			_font_variant, 
 			_font_weight;
-		uint32_t _background,
-						 _font_size,
-						 _font_color;
+		uint32_t 
+			_background,
+			_font_size,
+			_font_color;
 
 	public:
 		NCLTextPlayer(NCLEnviroment *env, struct nclmedia_t *media);

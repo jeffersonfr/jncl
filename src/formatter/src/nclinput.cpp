@@ -54,14 +54,16 @@ NCLInput * NCLInput::GetInstance()
 
 void NCLInput::Init()
 {
-	jgui::InputManager::GetInstance()->RegisterKeyListener(this);
+	// TODO:: capture events from the main window (use components instead windows)
+	// jgui::InputManager::GetInstance()->RegisterKeyListener(this);
 }
 
 void NCLInput::Release()
 {
 	RemoveAllListeners();
 
-	jgui::InputManager::GetInstance()->RemoveKeyListener(this);
+	// TODO:: disable capture of events from the main window
+	// jgui::InputManager::GetInstance()->RemoveKeyListener(this);
 }
 
 void NCLInput::RemoveAllListeners()

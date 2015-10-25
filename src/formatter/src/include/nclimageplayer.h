@@ -41,6 +41,7 @@ class NCLImagePlayer : public NCLPlayer{
 	private:
 		NCLEnviroment *_enviroment;
 		jgui::Image *_image;
+		jgui::Theme _theme;
 		std::string _filename;
 
 	public:
