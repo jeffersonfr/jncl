@@ -156,10 +156,13 @@ void IPTuner::Save()
 	
 	o << "</channels>\r\n";
 
-	jio::File file("./config/channels.xml", jio::JFF_CREATE | jio::JFF_TRUNCATE | jio::JFF_READ_WRITE);
+	jio::File *file = jio::File::OpenFile("./config/channels.xml", (jio::jfile_flags_t)(jio::JFF_TRUNCATE | jio::JFF_READ_WRITE));
 
-	file.Write(o.str().c_str(), o.str().size());
-	file.Close();
+	if (file != NULL) {
+		file->Write(o.str().c_str(), o.str().size());
+
+		delete file;
+	}
 }
 
 void IPTuner::Scan()

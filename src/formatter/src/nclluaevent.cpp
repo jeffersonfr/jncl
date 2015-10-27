@@ -79,10 +79,10 @@ void NCLLuaEventBinding::ActionPerformed(jncl::NCLEvent *nclevent)
 		
 	jncl::NCLSelectionEvent *event = (jncl::NCLSelectionEvent *)nclevent;
 
-	jncl::nclevent_symbol_t key;
+	// jncl::nclevent_symbol_t key;
 	std::string symbol;
 
-	key = event->GetSymbol();
+	// key = event->GetSymbol();
 
 	if (event->GetSymbol() == jncl::NCL_SYMBOL_CURSOR_LEFT) {
 		symbol = "CURSOR_LEFT";
@@ -190,7 +190,7 @@ int NCLLuaEventBinding::_lua_create(lua_State *L)
 
 int NCLLuaEventBinding::_lua_gc(lua_State *L)
 {
-	NCLLuaEventBinding *a = (NCLLuaEventBinding *)lua_unboxpointer(L, 1);
+	// NCLLuaEventBinding *a = (NCLLuaEventBinding *)lua_unboxpointer(L, 1);
 
 	// delete a;
 

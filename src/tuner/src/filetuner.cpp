@@ -147,10 +147,13 @@ void FileTuner::Save()
 	
 	o << "</channels>\r\n";
 
-	jio::File file("./config/channels.xml", jio::JFF_CREATE | jio::JFF_TRUNCATE | jio::JFF_READ_WRITE);
+	jio::File *file = jio::File::OpenFile("./config/channels.xml", (jio::jfile_flags_t)(jio::JFF_TRUNCATE | jio::JFF_READ_WRITE));
 
-	file.Write(o.str().c_str(), o.str().size());
-	file.Close();
+	if (file != NULL) {
+		file->Write(o.str().c_str(), o.str().size());
+
+		delete file;
+	}
 }
 
 void FileTuner::Scan()
@@ -163,10 +166,15 @@ void FileTuner::Scan()
 
 	_channels.clear();
 
-	jio::File file(_directory);
+	jio::File *file = jio::File::OpenDirectory(_directory);
 	std::vector<std::string> files;
 	
-	file.ListFiles(&files);
+	if (file != NULL) {
+		file->ListFiles(&files);
+
+		delete file;
+		file = NULL;
+	}
 
 	for (std::vector<std::string>::iterator i=files.begin(); i!=files.end(); i++) {
 		std::string s = (*i);

@@ -172,20 +172,25 @@ void NCLTextPlayer::Render()
 	g->Reset();
 	g->Clear();
 	
+	jio::File *file = NULL;
 	char tmp[1024];
 
 	try {
-		jio::File file(_filename);
-		int r,
-				k = 0;
+		int r, k = 0;
 
-		while ((r = file.Read((tmp+k), 255)) > 0 && k < (1024-1)) {
+		file = jio::File::OpenFile(_filename);
+
+		while ((r = file->Read((tmp+k), 255)) > 0 && k < (1024-1)) {
 			k = k + r;
 		}
 
 		tmp[k] = '\0';
 	} catch (...) {
 		tmp[0] = '\0';
+	}
+
+	if (file != NULL) {
+		delete file;
 	}
 
 	std::string text = tmp;
