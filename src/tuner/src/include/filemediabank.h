@@ -22,12 +22,13 @@
 
 #include "mediabank.h"
 #include "channel.h"
-#include "jfileinputstream.h"
-#include "jindexedbuffer.h"
-#include "jmutex.h"
-#include "jthread.h"
+
+#include "jio/jfileinputstream.h"
+#include "jshared/jindexedbuffer.h"
 
 #include <string>
+#include <thread>
+#include <mutex>
 
 #include <stdint.h>
 
@@ -38,27 +39,26 @@ namespace tuner {
  * 
  * \author Jeff Ferr
  */
-class FileMediaBank : public MediaBank, jthread::Thread{
+class FileMediaBank : public MediaBank {
 
 	private:
-		jio::FileInputStream *_file;
-		jthread::Mutex _mutex;
-		
-		jthread::IndexedBuffer *_buffer;
-		int _read_index;
-		int _pass_index;
-		int _packet_index;
-		int _packet_max;
-		char *_packet;
-		bool _flag;
-
-		int pidPcr;
-		bool ok,
-				 paused,
-				 loop,
-				 stop,
-				 running;
-
+		jio::FileInputStream 
+      *_file;
+		jshared::IndexedBuffer 
+      *_buffer;
+    std::thread
+      _thread;
+    std::mutex 
+      _mutex;
+		int _read_index,
+		  _pass_index,
+		  _packet_index,
+		  _packet_max,
+      pidPcr;
+		bool 
+			_running;
+		char 
+      *_packet;
 
 	protected:
 

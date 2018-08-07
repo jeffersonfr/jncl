@@ -21,6 +21,8 @@
 #include "nclformatter.h"
 #include "nclenviroment.h"
 
+#include "jgui/jbufferedimage.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,11 +48,11 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
 
-	_image = jgui::Image::CreateImage(_filename);
+	_image = new jgui::BufferedImage(_filename);
 
 	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
 
-	_theme.SetBorder("window", jgui::JCB_EMPTY);
+	_theme.SetIntegerParam("window.border", jgui::JCB_EMPTY);
 
 	_component->SetTheme(&_theme);
 	_component->SetBackgroundVisible(false);
@@ -65,7 +67,10 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 NCLImagePlayer::~NCLImagePlayer()
 {
+  _component->SetTheme(NULL);
+
 	delete _image;
+  _image = NULL;
 }
 
 void NCLImagePlayer::Hide()
@@ -77,6 +82,7 @@ void NCLImagePlayer::Play()
 {
 	printf("NCLPlayer id=image src=%s play\n", _media->src.c_str());
 
+  /* TODO::
 	_component->Show(false);
 
 	Render();
@@ -86,6 +92,7 @@ void NCLImagePlayer::Play()
 	if (descriptor != NULL && descriptor->explicitdur > 0) {
 		NCLTimer::GetInstance()->RegisterTimerListener(this, "explicitDur", descriptor->explicitdur);
 	}
+  */
 
 	_is_alive = true;
 }
@@ -94,9 +101,11 @@ void NCLImagePlayer::Stop()
 {
 	printf("NCLPlayer id=image src=%s stop\n", _media->src.c_str());
 
+  /* TODO:: 
 	NCLTimer::GetInstance()->RemoveTimerListener(this);
 
 	_component->Hide();
+  */
 
 	_is_alive = false;
 }
@@ -131,26 +140,27 @@ void NCLImagePlayer::Release()
 
 void NCLImagePlayer::Render()
 {
+  /*
 	jgui::Graphics *g = _component->GetGraphics();
 
 	if (g == NULL) {
 		return;
 	}
 
-	int width = _component->GetWidth(),
-			height = _component->GetHeight();
+  jgui::jsize_t size = _component->GetSize();
 
 	g->Reset();
 	g->Clear();
 	
 	g->SetCompositeFlags(jgui::JCF_SRC);
 
-	if (g->DrawImage(_image, 0, 0, width, height) == false) {
+	if (g->DrawImage(_image, 0, 0, size.width, size.height) == false) {
 		g->SetColor(0x00, 0x00, 0x00, 0xff);
-		g->FillRectangle(0, 0, width, height);
+		g->FillRectangle(0, 0, size.width, size.height);
 	}
 
 	g->Flip();
+  */
 }
 
 }

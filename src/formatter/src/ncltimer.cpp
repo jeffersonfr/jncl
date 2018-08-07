@@ -18,8 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ncltimer.h"
-#include "jautolock.h"
-#include "jdate.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,10 +29,9 @@ namespace jncl {
 
 NCLTimer *NCLTimer::_instance = NULL;
 
-NCLTimer::NCLTimer():
-	jthread::Thread()
+NCLTimer::NCLTimer()
 {
-	_running = true;
+	_running = false;
 }
 
 NCLTimer::~NCLTimer()
@@ -55,14 +52,14 @@ NCLTimer * NCLTimer::GetInstance()
 
 void NCLTimer::Init()
 {
-	Start();
+	_thread = std::thread(&NCLTimer::Run, this);
 }
 
 void NCLTimer::Release()
 {
 	_running = false;
 
-	WaitThread();
+  _thread.join();
 }
 
 void NCLTimer::RemoveAllListeners()
@@ -72,7 +69,7 @@ void NCLTimer::RemoveAllListeners()
 
 void NCLTimer::RegisterTimerListener(NCLTimerListener *listener, std::string name, time_t delay, time_t loop)
 {
-	jthread::AutoLock lock(&_mutex);
+  std::unique_lock<std::mutex> lock(_mutex);
 
 	for (std::vector<struct ncltimer_t *>::iterator i=_listeners.begin(); i!=_listeners.end(); i++) {
 		if ((*i)->listener == listener) {
@@ -82,21 +79,19 @@ void NCLTimer::RegisterTimerListener(NCLTimerListener *listener, std::string nam
 
 	struct ncltimer_t *t = new struct ncltimer_t;
 
-	time_t current = jcommon::Date::CurrentTimeMillis();
-
 	t->listener = listener;
 	t->name = name;
-	t->delay = current + delay;
+	t->delay = delay + std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	t->loop = loop;
 
 	_listeners.push_back(t);
 
-	_sem.Notify();
+	_sem.notify_all();
 }
 
 void NCLTimer::RemoveTimerListener(NCLTimerListener *listener)
 {
-	jthread::AutoLock lock(&_mutex);
+  std::unique_lock<std::mutex> lock(_mutex);
 
 	for (std::vector<struct ncltimer_t *>::iterator i=_listeners.begin(); i!=_listeners.end(); i++) {
 		if ((*i)->listener == listener) {
@@ -109,12 +104,16 @@ void NCLTimer::RemoveTimerListener(NCLTimerListener *listener)
 
 void NCLTimer::Run()
 {
+  _running = true;
+
 	while (_running) {
 		if (_listeners.size() == 0) {
-			_sem.Wait();
+      std::unique_lock<std::mutex> lock(_mutex);
+
+			_sem.wait(lock);
 		}
 
-		time_t current = jcommon::Date::CurrentTimeMillis();
+    uint64_t current = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
 		for (int i=0; i<(int)_listeners.size(); i++) {
 			struct ncltimer_t *t = _listeners[i];

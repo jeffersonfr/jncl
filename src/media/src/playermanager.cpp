@@ -20,8 +20,9 @@
 #include "playermanager.h"
 #include "audioplayer.h"
 #include "videoplayer.h"
-#include "jurl.h"
 #include "mediaexception.h"
+
+#include "jnetwork/jurl.h"
 
 namespace media {
 
@@ -51,7 +52,7 @@ Player * PlayerManager::CreatePlayer(tuner::Locator *locator)
 
 	std::string file = locator->GetPath();
 
-	std::cout << locator->what() << std::endl;
+	std::cout << locator->What() << std::endl;
 	try {
 		if (file.size() > 4) {
 			if (strcasecmp(((const char *)file.c_str()+file.size()-3), "mp3") == 0) {

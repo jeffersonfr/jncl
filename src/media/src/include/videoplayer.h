@@ -20,58 +20,26 @@
 #ifndef VIDEOPLAYER_H
 #define VIDEOPLAYER_H
 
-#include "jpanel.h"
-#include "jimage.h"
-#include "jcomponent.h"
 #include "mediaplayer.h"
-#include "jthread.h"
 #include "tuner.h"
-#include "jthread.h"
+
+#include "jgui/jcontainer.h"
+#include "jgui/jimage.h"
+#include "jgui/jcomponent.h"
 
 #include <iostream>
 #include <string>
 #include <map>
+#include <thread>
 
-#include <directfb.h>
-#include <directfb_strings.h>
-#include <xine.h>
-#include <xine/xineutils.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef void (*DVOutputCallback) (void *cdata, int width, int height, double ratio, DFBSurfacePixelFormat format, DFBRectangle *dest_rect );
-
-typedef struct {
-	IDirectFBSurface *destination;
-	IDirectFBSurface *subpicture;
-
-	DVOutputCallback  output_cb;
-	void             *output_cdata;
-
-	DVFrameCallback  frame_cb;
-	void            *frame_cdata;
-} dfb_visual_t;
-
-struct frame_data {
-	IDirectFBWindow   *window;
-	IDirectFBSurface  *frame;
-	IDirectFBSurface  *osd;
-	IDirectFBSurface  *dest;
-	int                progress;
-	int                width;
-	int                height;
-	int                screen_width;
-	int                screen_height;
-	pthread_mutex_t    mutex;
-	jgui::Component    *component;
-	uint8_t            *source;
-};
 
 namespace media {
 
 class PlayerManager;
 
-class VideoComponent : public jgui::Component{
+class VideoComponent : public jgui::Component {
 
 		private:
 			jgui::Image *_image;
@@ -90,7 +58,7 @@ class VideoComponent : public jgui::Component{
 
 };
 
-class VideoPlayer : public Player, public jthread::Thread{
+class VideoPlayer : public Player {
 
 	friend class PlayerManager;
 
@@ -99,29 +67,29 @@ class VideoPlayer : public Player, public jthread::Thread{
 		std::map<int, int> _timed_handlers;
 		struct frame_data *data;
 		jgui::Component *_component;
+    std::thread _thread;
 
 		VideoPlayer(tuner::Locator *mrl);
 
 	public:
-		jgui::Image *_offscreen;
-		xine_t *xine;
-		xine_video_port_t *vo;
-		xine_audio_port_t *ao;
-		xine_stream_t *stream;
-		xine_osd_t *osd;
-		xine_event_queue_t *event;
-
-		int _screen_width,
+		jgui::Image 
+      *_offscreen;
+		std::string 
+      _mrl;
+		int 
+      _screen_width,
 			_screen_height,
 			_scale_width,
 			_scale_height;
-		int cx,
+		int 
+      cx,
 			cy,
 			cw,
 			ch;
-		std::string _mrl;
-		int _volume;
-		bool paused,
+		int 
+      _volume;
+		bool
+      paused,
 			 _mute,
 			 _alive,
 			 _flag,

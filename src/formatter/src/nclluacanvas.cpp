@@ -21,9 +21,8 @@
 #include "nclluaevent.h"
 #include "nclhelper.h"
 #include "nclluasettings.h"
-#include "jgfxhandler.h"
 
-#include <directfb.h>
+#include "jgui/jbufferedimage.h"
 
 const char NCLLuaCanvasBinding::className[] = "canvas";
 
@@ -60,13 +59,13 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(int xp, int yp, int wp, int hp)
 
 	_size = _window->GetSize();
 
-	_theme.SetBorder("window", jgui::JCB_EMPTY);
+	_theme.SetIntegerParam("window.border.type", jgui::JCB_EMPTY);
 
 	_window->SetTheme(&_theme);
 	_window->SetBackgroundVisible(false);
-	_window->Show(false);
+	// TODO:: _window->Show(false);
 
-	_graphics = _window->GetGraphics();
+	// TODO:: _graphics = _window->GetGraphics();
 }
 
 NCLLuaCanvasBinding::NCLLuaCanvasBinding(std::string image, int wp, int hp)
@@ -78,7 +77,10 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(std::string image, int wp, int hp)
 	_window = NULL;
 	_graphics = NULL;
 
-	jgui::jsize_t isize = jgui::Image::GetImageSize(image);
+	_image = new jgui::BufferedImage(image);
+	
+  jgui::jsize_t 
+    isize = _image->GetSize();
 
 	if (wp <= 0) {
 		wp = isize.width;
@@ -90,8 +92,6 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(std::string image, int wp, int hp)
 
 	_size.width = wp;
 	_size.height = hp;
-
-	_image = jgui::Image::CreateImage(image);
 }
 
 NCLLuaCanvasBinding::NCLLuaCanvasBinding(int wp, int hp)
@@ -108,7 +108,7 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(int wp, int hp)
 	_size.width = wp;
 	_size.height = hp;
 
-	_image = jgui::Image::CreateImage(jgui::JPF_ARGB, wp, hp);
+	_image = new jgui::BufferedImage(jgui::JPF_ARGB, wp, hp);
 	_graphics = _image->GetGraphics();
 }
 
@@ -330,6 +330,7 @@ int NCLLuaCanvasBinding::measuretext(lua_State *L)
 		return 0;
 	}
 
+  /*
 	IDirectFBFont *font = (IDirectFBFont *)a->_font->GetNativeFont();
 	DFBRectangle rect;
 
@@ -344,6 +345,7 @@ int NCLLuaCanvasBinding::measuretext(lua_State *L)
 	lua_pushnumber(L, y);
 	lua_pushnumber(L, w);
 	lua_pushnumber(L, h);
+  */
 
 	return 4;
 }
@@ -358,6 +360,7 @@ int NCLLuaCanvasBinding::pixel(lua_State *L)
 		return 0;
 	}
 
+  /*
 	if (lua_gettop(L) > 2) {
 		jgui::Color color = a->_graphics->GetColor();
 
@@ -423,6 +426,7 @@ int NCLLuaCanvasBinding::pixel(lua_State *L)
 			return 4;
 		}
 	}
+  */
 
 	return 0;
 }
@@ -437,7 +441,8 @@ int NCLLuaCanvasBinding::line(lua_State *L)
 		return 0;
 	}
 
-	int x1 = (int)luaL_checknumber(L, 2),
+	int 
+    x1 = (int)luaL_checknumber(L, 2),
 		y1 = (int)luaL_checknumber(L, 3),
 		x2 = (int)luaL_checknumber(L, 4),
 		y2 = (int)luaL_checknumber(L, 5);
@@ -625,7 +630,7 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 			y = (int)luaL_checknumber(L, 4);
 
 		if (img != NULL) {
-			jgui::Image *image = jgui::Image::CreateImage(img);
+			jgui::Image *image = new jgui::BufferedImage(img);
 
 			a->_graphics->DrawImage(image, x, y);
 
@@ -639,7 +644,7 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 			h = (int)luaL_checknumber(L, 6);
 
 		if (img != NULL) {
-			jgui::Image *image = jgui::Image::CreateImage(img);
+			jgui::Image *image = new jgui::BufferedImage(img);
 
 			a->_graphics->DrawImage(image, x, y, w, h);
 
@@ -657,7 +662,7 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 			sh = (int)luaL_checknumber(L, 10);
 
 		if (img != NULL) {
-			jgui::Image *image = jgui::Image::CreateImage(img);
+			jgui::Image *image = new jgui::BufferedImage(img);
 
 			a->_graphics->DrawImage(image, sx, sy, sw, sh, x, y, w, h);
 
@@ -699,7 +704,7 @@ int NCLLuaCanvasBinding::flush(lua_State *L)
 	NCLLuaCanvasBinding *a = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
 	if (a->_graphics != NULL) {
-		a->_graphics->Flip();
+		// TODO:: a->_graphics->Flip();
 	}
 
 	return 0;
@@ -715,6 +720,7 @@ int NCLLuaCanvasBinding::compose(lua_State *L)
 		return luaL_argerror(L, 4, "invalid canvas parameter (nil)");
 	}
 
+  /*
 	NCLLuaCanvasBinding *c2 = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 4, className));
 	jgui::Graphics *g1 = NULL,
 		*g2 = NULL;
@@ -751,6 +757,7 @@ int NCLLuaCanvasBinding::compose(lua_State *L)
 	} else if (lua_type(L, 5) == LUA_TNONE) {
 		g1->DrawImage(img, x, y); 
 	}
+  */
 
 	return 0;
 }

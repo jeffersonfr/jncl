@@ -18,14 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "audioplayer.h"
-#include "directfb.h"
 
 namespace media {
 
 AudioPlayer::AudioPlayer(tuner::Locator *mrl)
 {
 	_mute = false;
-	_mrl = mrl->what();
+	_mrl = mrl->What();
 	_volume = 1.0;
 	_loop = false;
 	

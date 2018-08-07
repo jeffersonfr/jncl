@@ -21,14 +21,14 @@
 #define J_NCLTIMER_H
 
 #include "ncltimerlistener.h"
-#include "jmutex.h"
-#include "jthread.h"
-#include "jsemaphore.h"
 
 #include <string>
 #include <list>
 #include <vector>
 #include <map>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace jncl {
 
@@ -37,7 +37,7 @@ namespace jncl {
  * 
  * \author Jeff Ferr
  */
-class NCLTimer : public jthread::Thread{
+class NCLTimer {
 
 	private:
 		static NCLTimer *_instance;
@@ -51,8 +51,9 @@ class NCLTimer : public jthread::Thread{
 
 	private:
 		std::vector<struct ncltimer_t *> _listeners;
-		jthread::Mutex _mutex;
-		jthread::Semaphore _sem;
+    std::thread _thread;
+		std::mutex _mutex;
+    std::condition_variable _sem;
 		bool _running;
 
 	public:

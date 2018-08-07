@@ -49,8 +49,10 @@ http://www.lavid.ufpb.br
 #define DEMUXMANAGER_H_
 
 #include "demux.h"
-#include "jindexedbuffer.h"
-#include "jthread.h"
+
+#include "jshared/jindexedbuffer.h"
+
+#include <thread>
 
 namespace demux {
 
@@ -67,12 +69,13 @@ enum demux_t {
 
 class Filter;
 
-class DemuxManager : public jthread::Thread{
+class DemuxManager {
 
 	private:
 		static DemuxManager *_instance;
 
-		jthread::IndexedBuffer *buffer;
+		jshared::IndexedBuffer *buffer;
+    std::thread _thread;
 		bool isInitialized;
 
 		virtual void Run();

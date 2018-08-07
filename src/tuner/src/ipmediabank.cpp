@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ipmediabank.h"
-#include "jinputstream.h"
-#include "jdatagramsocket.h"
-#include "jsocketoptions.h"
-#include "jthread.h"
+
+#include "jio/jinputstream.h"
+#include "jnetwork/jdatagramsocket.h"
+#include "jnetwork/jsocketoptions.h"
 
 #include <unistd.h>
 
@@ -47,18 +47,17 @@ unsigned char null_packet [188]= {
 };
 
 IPMediaBank::IPMediaBank():
-	MediaBank(),
-	jthread::Thread()
+	MediaBank()
 {
 	_socket = NULL;
 	_read_index = 0;
 	_pass_index = 0;
-	_flag = false;
+	_running = false;
 	_packet_index = 0;
 	_packet_max = 0;
 	_input_stream = NULL;
 
-	_buffer = new jthread::IndexedBuffer(1024, 4096);
+	_buffer = new jshared::IndexedBuffer(1024, 4096);
 
 	_packet = new char[4096];
 }
@@ -75,10 +74,10 @@ void IPMediaBank::SetLocator(Locator *locator)
 
 	try {
 		if (_socket != NULL) {
-			_flag = false;
+			_running = false;
 
-			if (IsRunning() == true) {
-				WaitThread();
+			if (_running == true) {
+				_thread.join();
 			}
 
 			_socket->Close();
@@ -87,10 +86,10 @@ void IPMediaBank::SetLocator(Locator *locator)
 		}
 
 		if (locator->GetProtocol() == "udp") {
-			_socket = dynamic_cast<jsocket::Connection *>(new jsocket::DatagramSocket(locator->GetPort()));
+			_socket = dynamic_cast<jnetwork::Connection *>(new jnetwork::DatagramSocket(locator->GetPort()));
 
 			{
-				jsocket::SocketOptions *o = ((jsocket::DatagramSocket *)_socket)->GetSocketOptions(); 
+				jnetwork::SocketOptions *o = ((jnetwork::DatagramSocket *)_socket)->GetSocketOptions(); 
 
 				o->SetReceiveTimeout(2*500);
 
@@ -99,9 +98,7 @@ void IPMediaBank::SetLocator(Locator *locator)
 
 			_input_stream = _socket->GetInputStream();
 
-			_flag = true;
-
-			Start();
+			_thread = std::thread(&IPMediaBank::Run, this);
 		}
 	} catch (...) {
 		_socket = NULL;
@@ -134,9 +131,11 @@ int IPMediaBank::AddData(char *data, int size)
 
 int IPMediaBank::GetData(char *data, int size)
 {
-	jthread::jbuffer_chunk_t t;
-	int r,
-			d = _packet_max - _packet_index;
+	jshared::jbuffer_chunk_t 
+    t;
+	int 
+    r,
+		d = _packet_max - _packet_index;
 
 	if (d > 0) {
 		if (size <= d) {
@@ -174,8 +173,12 @@ int IPMediaBank::GetData(char *data, int size)
 
 void IPMediaBank::Run()
 {
-	int r;
-	char receive[1500];
+	int 
+    r;
+	char 
+    receive[1500];
+
+  _running = true;
 
 	do {
 		r = -1;
@@ -191,7 +194,7 @@ void IPMediaBank::Run()
 		} else {
 			AddData(receive, r);
 		}
-	} while (_flag == true);
+	} while (_running == true);
 }
 
 };

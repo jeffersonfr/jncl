@@ -21,9 +21,11 @@
 #define IPMIDIABANK_H
 
 #include "mediabank.h"
-#include "jthread.h"
-#include "jconnection.h"
-#include "jindexedbuffer.h"
+
+#include "jnetwork/jconnection.h"
+#include "jshared/jindexedbuffer.h"
+
+#include <thread>
 
 #include <stdint.h>
 
@@ -34,15 +36,17 @@ namespace tuner {
  * 
  * \author Jeff Ferr
  */
-class IPMediaBank : public MediaBank, public jthread::Thread{
+class IPMediaBank : public MediaBank {
 
 	private:
 		/** \brief */
-		jthread::IndexedBuffer *_buffer;
+		jshared::IndexedBuffer *_buffer;
 		/** \brief */
-		jsocket::Connection *_socket;
+		jnetwork::Connection *_socket;
 		/** \brief */
 		jio::InputStream *_input_stream;
+		/** \brief */
+    std::thread _thread;
 		/** \brief */
 		std::string _ip;
 		/** \brief */
@@ -58,7 +62,7 @@ class IPMediaBank : public MediaBank, public jthread::Thread{
 		/** \brief */
 		int _packet_max;
 		/** \brief */
-		bool _flag;
+		bool _running;
 
 	protected:
 

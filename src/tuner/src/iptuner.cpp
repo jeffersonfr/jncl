@@ -19,10 +19,11 @@
  ***************************************************************************/
 #include "iptuner.h"
 #include "ipmediabank.h"
-#include "jxmlparser.h"
-#include "jdatagramsocket.h"
 #include "ipchannel.h"
-#include "jfile.h"
+
+#include "jcommon/jxmlparser.h"
+#include "jnetwork/jdatagramsocket.h"
+#include "jio/jfile.h"
 
 #include <algorithm>
 
@@ -183,7 +184,7 @@ void IPTuner::Scan()
 
 	for (i=_port; i<_port+_range && _flag == true; i++) { 
 		try {
-			jsocket::DatagramSocket s(i);
+			jnetwork::DatagramSocket s(i);
 
 			r = s.Receive(receive, 4096, 2000);
 

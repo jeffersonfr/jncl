@@ -20,15 +20,17 @@
 #ifndef J_NCLPLAYER_H
 #define J_NCLPLAYER_H
 
-#include "jwindow.h"
 #include "nclloader.h"
 #include "ncltimerlistener.h"
 #include "ncltimer.h"
+
+#include "jgui/jwindow.h"
 
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
+#include <mutex>
 
 namespace jncl {
 
@@ -55,7 +57,7 @@ class NCLPlayer : public NCLTimerListener{
 
 	protected:
 		std::vector<struct ncllink_t *> _links;
-		jthread::Mutex _mutex;
+		std::mutex _mutex;
 		jgui::Window *_component;
 		struct nclmedia_t *_media;
 		int _transition_time;

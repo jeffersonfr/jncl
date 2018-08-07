@@ -22,9 +22,9 @@
 
 #include "nclluaobjectbinding.h"
 
-#include "jimage.h"
-#include "jfont.h"
-#include "jframe.h"
+#include "jgui/jimage.h"
+#include "jgui/jfont.h"
+#include "jgui/jwindow.h"
 
 #include <iostream>
 #include <string>

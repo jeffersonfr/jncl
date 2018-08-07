@@ -22,7 +22,8 @@
 
 #include "nclloader.h"
 #include "nclselectionevent.h"
-#include "jkeyevent.h"
+
+#include "jevent/jkeyevent.h"
 
 #include <string>
 #include <vector>
@@ -87,7 +88,7 @@ class NCLHelper{
 		 * \brief
 		 *
 		 */
-		static nclevent_symbol_t TranslateKey(jgui::jkeyevent_symbol_t key);
+		static nclevent_symbol_t TranslateKey(jevent::jkeyevent_symbol_t key);
 
 		/**
 		 * \brief

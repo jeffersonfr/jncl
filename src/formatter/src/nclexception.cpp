@@ -27,7 +27,7 @@
 namespace jncl {
 
 NCLException::NCLException(std::string reason):
-	jcommon::RuntimeException(reason)
+	jexception::RuntimeException(reason)
 {
 }
 

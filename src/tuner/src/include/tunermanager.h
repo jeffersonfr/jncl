@@ -21,8 +21,9 @@
 #define TUNERMANAGER_H
 
 #include "tuner.h"
-#include "jurl.h"
 #include "locator.h"
+
+#include "jnetwork/jurl.h"
 
 #include <stdint.h>
 

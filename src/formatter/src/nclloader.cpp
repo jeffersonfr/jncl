@@ -21,8 +21,9 @@
 #include "nclhelper.h"
 #include "nclformatter.h"
 #include "nclexception.h"
-#include "jdebug.h"
 #include "nclenviroment.h"
+
+#include "jlogger/jloggerlib.h"
 
 #include <stdio.h>
 #include <stdlib.h>

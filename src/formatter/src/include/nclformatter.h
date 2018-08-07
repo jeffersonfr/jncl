@@ -22,14 +22,14 @@
 
 #include "nclloader.h"
 #include "nclplayer.h"
-#include "jcondition.h"
 #include "nclenviroment.h"
-#include "jthread.h"
 
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
+#include <thread>
+#include <condition_variable>
 
 namespace jncl {
 
@@ -38,12 +38,13 @@ namespace jncl {
  * 
  * \author Jeff Ferr
  */
-class NCLFormatter : public NCLEventListener, public jthread::Thread{
+class NCLFormatter : public NCLEventListener {
 
 	private:
 		std::map<std::string, NCLPlayer *> _players;
-		jthread::Condition _semaphore;
-		jthread::Mutex _mutex;
+    std::thread _thread;
+    std::condition_variable _semaphore;
+    std::mutex _mutex;
 		NCLLoader *_loader;
 		NCLEnviroment *_enviroment;
 		bool _released;

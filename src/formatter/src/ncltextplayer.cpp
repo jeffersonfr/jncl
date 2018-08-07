@@ -21,8 +21,9 @@
 #include "nclformatter.h"
 #include "nclenviroment.h"
 #include "nclhelper.h"
-#include "jfile.h"
-#include "jstringutils.h"
+
+#include "jcommon/jstringutils.h"
+#include "jio/jfile.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -80,13 +81,13 @@ NCLTextPlayer::NCLTextPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 		}
 	}
 
-	_font = jgui::Font::CreateFont("fonts/font.ttf", jgui::JFA_NORMAL, _font_size);
+	_font = new jgui::Font("fonts/font.ttf", jgui::JFA_NORMAL, _font_size);
 
 	// _filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
 
 	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
 
-	_theme.SetBorder("window", jgui::JCB_EMPTY);
+	_theme.SetIntegerParam("window.border", jgui::JCB_EMPTY);
 
 	_component->SetTheme(&_theme);
 	_component->SetBackgroundVisible(false);
@@ -95,6 +96,7 @@ NCLTextPlayer::NCLTextPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 NCLTextPlayer::~NCLTextPlayer()
 {
+  _component->SetTheme(NULL);
 }
 
 void NCLTextPlayer::Hide()
@@ -106,6 +108,7 @@ void NCLTextPlayer::Play()
 {
 	printf("NCLPlayer id=text src=%s play\n", _media->src.c_str());
 
+  /* TODO::
 	_component->Show(false);
 
 	Render();
@@ -115,6 +118,7 @@ void NCLTextPlayer::Play()
 	if (descriptor != NULL && descriptor->explicitdur > 0) {
 		NCLTimer::GetInstance()->RegisterTimerListener(this, "explicitDur", descriptor->explicitdur);
 	}
+  */
 
 	_is_alive = true;
 }
@@ -123,7 +127,7 @@ void NCLTextPlayer::Stop()
 {
 	printf("NCLPlayer id=text src=%s stop\n", _media->src.c_str());
 
-	_component->Hide();
+	// TODO:: _component->Hide();
 
 	NCLTimer::GetInstance()->RemoveTimerListener(this);
 
@@ -160,6 +164,7 @@ void NCLTextPlayer::Release()
 
 void NCLTextPlayer::Render()
 {
+  /* TODO::
 	jgui::Graphics *g = _component->GetGraphics();
 
 	if (g == NULL) {
@@ -210,6 +215,7 @@ void NCLTextPlayer::Render()
 	// }
 
 	g->Flip();
+  */
 }
 
 }

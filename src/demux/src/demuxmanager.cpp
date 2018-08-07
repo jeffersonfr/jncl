@@ -65,13 +65,14 @@ DemuxManager *DemuxManager::_instance = NULL;
 
 DemuxManager::DemuxManager()
 {
-	buffer = new jthread::IndexedBuffer(4096, 188*7);
+	buffer = new jshared::IndexedBuffer(4096, 188*7);
 	
-	Start();
+  _thread = std::thread(&DemuxManager::Run, this);
 }
 
 DemuxManager::~DemuxManager() 
 {
+  _thread.join();
 }
 
 DemuxManager * DemuxManager::getInstance() 

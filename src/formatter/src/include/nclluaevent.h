@@ -22,22 +22,21 @@
 
 #include "nclluaobjectbinding.h"
 #include "ncleventlistener.h"
-#include "jframe.h"
-#include "jmutex.h"
+
+#include "jgui/jwindow.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-class NCLLuaEventBinding : public jncl::NCLEventListener{
-
-	friend class jgui::Frame;
+class NCLLuaEventBinding : public jncl::NCLEventListener {
 
 	public:
-		jthread::Mutex event_mutex;
+		std::mutex event_mutex;
 		std::vector<int> _handlers;
 		lua_State *_lua;
 

@@ -22,17 +22,12 @@
 namespace tuner {
 
 TunerException::TunerException(std::string reason_):
-	jcommon::Exception(reason_), std::runtime_error(reason_)
+	jexception::Exception(reason_)
 {
 }
 
 TunerException::~TunerException() throw()
 {
-}
-
-std::string TunerException::what()
-{
-	return std::runtime_error::what();
 }
 
 };

@@ -48,7 +48,7 @@ http://www.lavid.ufpb.br
 #ifndef SOURCE_H_
 #define SOURCE_H_
 
-#include "jindexedbuffer.h"
+#include "jshared/jindexedbuffer.h"
 
 #include <list>
 
@@ -59,16 +59,20 @@ class Source{
 	private:
 
 	public:
-		jthread::IndexedBuffer *buffer;
-		int _read_index,
-				_pass_index,
-				_packet_index,
-				_packet_max;
-		char *_packet;
-		bool _flag;
+		jshared::IndexedBuffer 
+      *buffer;
+		int 
+      _read_index,
+			_pass_index,
+			_packet_index,
+			_packet_max;
+		char 
+      *_packet;
+		bool 
+      _flag;
 
 	public:
-		Source(jthread::IndexedBuffer *b);
+		Source(jshared::IndexedBuffer *b);
 		virtual ~Source()
 		{
 		}

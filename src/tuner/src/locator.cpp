@@ -18,15 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "locator.h"
-#include "jstringtokenizer.h"
-#include "jruntimeexception.h"
+
+#include "jcommon/jstringtokenizer.h"
+#include "jexception/jruntimeexception.h"
 
 #include <stdlib.h>
 
 namespace tuner {
 
 Locator::Locator(std::string locator):
-	jcommon::URL(locator)
+	jnetwork::URL(locator)
 {
 }
 

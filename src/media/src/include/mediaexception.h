@@ -1,11 +1,11 @@
 #ifndef MEDIAEXCEPTION_H
 #define MEDIAEXCEPTION_H
 
-#include "jruntimeexception.h"
+#include "jexception/jruntimeexception.h"
 
 namespace media {
 
-class MediaException : public jcommon::RuntimeException{
+class MediaException : public jexception::RuntimeException {
 
 	public:
 		/**

@@ -151,7 +151,7 @@ void NCLLuaPlayer::Stop()
 {
 	printf("NCLPlayer id=image src=%s stop\n", _media->src.c_str());
 
-	_component->Hide();
+	// TODO:: _component->Hide();
 
 	lua_gc(_luaL, LUA_GCCOLLECT, 0);
 	lua_close(_luaL);

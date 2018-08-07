@@ -21,13 +21,13 @@
 #define AUDIOPLAYER_H
 
 #include "mediaplayer.h"
-#include "jthread.h"
 #include "tuner.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
+#include <thread>
 
 #include <stdio.h>
 #include <stdlib.h>

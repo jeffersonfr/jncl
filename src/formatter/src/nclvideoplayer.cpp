@@ -60,6 +60,7 @@ NCLVideoPlayer::NCLVideoPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 		_is_video_layer = false;
 
+    /* TODO::
 		tuner::Locator *locator = new tuner::Locator("file://" + _enviroment->GetBaseDirectory() + "/" + _media->src);
 
 		_component = new jgui::Window(left, top, width, height);
@@ -75,6 +76,7 @@ NCLVideoPlayer::NCLVideoPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 		_component->Add(((media::VideoPlayer *)_player)->GetComponent());
 
 		delete locator;
+    */
 	}
 	
 	for (std::vector<struct nclparam_t>::iterator i=media->params.begin(); i!=media->params.end(); i++) {
@@ -114,7 +116,7 @@ void NCLVideoPlayer::Play()
 	}
 		
 	if (_component != NULL) {
-		_component->Show(false);
+		// TODO:: _component->Show(false);
 	}
 	
 	struct ncldescriptor_t *descriptor = _media->descriptor;
@@ -130,7 +132,7 @@ void NCLVideoPlayer::Stop()
 	
 	if (_component != NULL) {
 		_player->Stop();
-		_component->Hide();
+		// TODO:: _component->Hide();
 	}
 	
 	NCLTimer::GetInstance()->RemoveTimerListener(this);

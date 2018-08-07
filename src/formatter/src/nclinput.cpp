@@ -19,8 +19,8 @@
  ***************************************************************************/
 #include "nclinput.h"
 #include "nclhelper.h"
-#include "jstringutils.h"
-#include "jinputmanager.h"
+
+#include "jcommon/jstringutils.h"
 
 #include <algorithm>
 
@@ -68,16 +68,16 @@ void NCLInput::Release()
 
 void NCLInput::RemoveAllListeners()
 {
-	_mutex.Lock();
+	_mutex.lock();
 
 	_listeners.clear();
 	
-	_mutex.Unlock();
+	_mutex.unlock();
 }
 
 void NCLInput::RegisterEventListener(NCLEventListener *listener)
 {
-	_mutex.Lock();
+	_mutex.lock();
 
 	std::vector<NCLEventListener *>::iterator i = std::find(_listeners.begin(), _listeners.end(), listener);
 
@@ -85,12 +85,12 @@ void NCLInput::RegisterEventListener(NCLEventListener *listener)
 		_listeners.push_back(listener);
 	}
 
-	_mutex.Unlock();
+	_mutex.unlock();
 }
 
 void NCLInput::RemoveEventListener(NCLEventListener *listener)
 {
-	_mutex.Lock();
+	_mutex.lock();
 
 	std::vector<NCLEventListener *>::iterator i = std::find(_listeners.begin(), _listeners.end(), listener);
 
@@ -98,7 +98,7 @@ void NCLInput::RemoveEventListener(NCLEventListener *listener)
 		_listeners.erase(i);
 	}
 
-	_mutex.Unlock();
+	_mutex.unlock();
 }
 
 void NCLInput::DispatchEvent(NCLEvent *event)
@@ -112,9 +112,9 @@ void NCLInput::DispatchEvent(NCLEvent *event)
 	delete event;
 }
 
-bool NCLInput::KeyPressed(jgui::KeyEvent *event)
+bool NCLInput::KeyPressed(jevent::KeyEvent *event)
 {
-	if (event->GetType() != jgui::JKT_PRESSED) {
+	if (event->GetType() != jevent::JKT_PRESSED) {
 		return false;
 	}
 

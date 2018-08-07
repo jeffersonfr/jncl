@@ -20,8 +20,9 @@
 #ifndef TUNEREVENT_H
 #define TUNEREVENT_H
 
-#include "jeventobject.h"
 #include "channel.h"
+
+#include "jevent/jeventobject.h"
 
 #include <stdint.h>
 
@@ -38,7 +39,7 @@ enum tuner_event_t {
  * 
  * \author Jeff Ferr
  */
-class TunerEvent : public jcommon::EventObject{
+class TunerEvent : public jevent::EventObject {
 
 	private:
 		/** \brief */

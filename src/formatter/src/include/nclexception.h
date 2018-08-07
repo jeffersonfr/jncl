@@ -20,7 +20,7 @@
 #ifndef J_NCLEXCEPTION_H
 #define J_NCLEXCEPTION_H
 
-#include "jruntimeexception.h"
+#include "jexception/jruntimeexception.h"
 
 #include <string>
 #include <vector>
@@ -34,7 +34,7 @@ namespace jncl {
  * 
  * \author Jeff Ferr
  */
-class NCLException : public jcommon::RuntimeException{
+class NCLException : public jexception::RuntimeException {
 
 	private:
 

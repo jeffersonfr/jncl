@@ -18,10 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "filetuner.h"
-#include "filechannel.h"
-#include "jfile.h"
-#include "jxmlparser.h"
 #include "filemediabank.h"
+#include "filechannel.h"
+
+#include "jcommon/jxmlparser.h"
+#include "jio/jfile.h"
 
 #include <algorithm>
 

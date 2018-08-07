@@ -22,7 +22,8 @@
 
 #include "nclenviroment.h"
 #include "nclplayer.h"
-#include "jimage.h"
+
+#include "jgui/jimage.h"
 
 #include <string>
 #include <vector>

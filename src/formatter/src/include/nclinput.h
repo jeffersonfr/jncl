@@ -21,13 +21,13 @@
 #define J_NCLINPUT_H
 
 #include "ncleventlistener.h"
-#include "jmutex.h"
-#include "jkeylistener.h"
+
+#include "jevent/jkeylistener.h"
 
 #include <string>
 #include <vector>
 #include <list>
-#include <map>
+#include <mutex>
 
 namespace jncl {
 
@@ -36,13 +36,13 @@ namespace jncl {
  * 
  * \author Jeff Ferr
  */
-class NCLInput : public jgui::KeyListener{
+class NCLInput : public jevent::KeyListener {
 
 	private:
 		static NCLInput *_instance;
 
 		std::vector<NCLEventListener *> _listeners;
-		jthread::Mutex _mutex;
+    std::mutex _mutex;
 
 	public:
 		NCLInput();
@@ -59,7 +59,7 @@ class NCLInput : public jgui::KeyListener{
 		void RemoveEventListener(NCLEventListener *listener);
 		void DispatchEvent(NCLEvent *event);
 
-		virtual bool KeyPressed(jgui::KeyEvent *event);
+		virtual bool KeyPressed(jevent::KeyEvent *event);
 
 };
 

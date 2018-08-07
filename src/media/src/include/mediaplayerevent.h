@@ -20,7 +20,7 @@
 #ifndef MEDIAPLAYEREVENT_H
 #define MEDIAPLAYEREVENT_H
 
-#include "jeventobject.h"
+#include "jevent/jeventobject.h"
 
 #include <string>
 
@@ -39,7 +39,7 @@ enum event_type_t {
 	FINISHED_EVENT
 };
 
-class MediaPlayerEvent : public jcommon::EventObject{
+class MediaPlayerEvent : public jevent::EventObject {
 
 	private:
 		/** \brief */

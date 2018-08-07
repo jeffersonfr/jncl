@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "nclhelper.h"
-#include "jstringutils.h"
-#include "jstringutils.h"
+
+#include "jcommon/jstringutils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -664,137 +664,137 @@ nclevent_symbol_t NCLHelper::TranslateKey(std::string key)
 	return symbol;
 }
 
-nclevent_symbol_t NCLHelper::TranslateKey(jgui::jkeyevent_symbol_t key)
+nclevent_symbol_t NCLHelper::TranslateKey(jevent::jkeyevent_symbol_t key)
 {
 	nclevent_symbol_t symbol = NCL_SYMBOL_UNKNOWN;
 
-	if (key == jgui::JKS_0) {
+	if (key == jevent::JKS_0) {
 		symbol = NCL_SYMBOL_0;
-	} else if (key == jgui::JKS_1) {
+	} else if (key == jevent::JKS_1) {
 		symbol = NCL_SYMBOL_1;
-	} else if (key == jgui::JKS_2) {
+	} else if (key == jevent::JKS_2) {
 		symbol = NCL_SYMBOL_2;
-	} else if (key == jgui::JKS_3) {
+	} else if (key == jevent::JKS_3) {
 		symbol = NCL_SYMBOL_3;
-	} else if (key == jgui::JKS_4) {
+	} else if (key == jevent::JKS_4) {
 		symbol = NCL_SYMBOL_4;
-	} else if (key == jgui::JKS_5) {
+	} else if (key == jevent::JKS_5) {
 		symbol = NCL_SYMBOL_5;
-	} else if (key == jgui::JKS_6) {
+	} else if (key == jevent::JKS_6) {
 		symbol = NCL_SYMBOL_6;
-	} else if (key == jgui::JKS_7) {
+	} else if (key == jevent::JKS_7) {
 		symbol = NCL_SYMBOL_7;
-	} else if (key == jgui::JKS_8) {
+	} else if (key == jevent::JKS_8) {
 		symbol = NCL_SYMBOL_8;
-	} else if (key == jgui::JKS_9) {
+	} else if (key == jevent::JKS_9) {
 		symbol = NCL_SYMBOL_9;
-	} else if (key == jgui::JKS_STAR) {
+	} else if (key == jevent::JKS_STAR) {
 		symbol = NCL_SYMBOL_ASTERISTIC;
-	} else if (key == jgui::JKS_SHARP) {
+	} else if (key == jevent::JKS_SHARP) {
 		symbol = NCL_SYMBOL_SHARP;
-	} else if (key == jgui::JKS_MENU) {
+	} else if (key == jevent::JKS_MENU) {
 		symbol = NCL_SYMBOL_MENU;
-	} else if (key == jgui::JKS_INFO) {
+	} else if (key == jevent::JKS_INFO) {
 		symbol = NCL_SYMBOL_INFO;
-	} else if (key == jgui::JKS_GUIDE) {
+	} else if (key == jevent::JKS_GUIDE) {
 		symbol = NCL_SYMBOL_GUIDE;
-	} else if (key == jgui::JKS_CURSOR_DOWN) {
+	} else if (key == jevent::JKS_CURSOR_DOWN) {
 		symbol = NCL_SYMBOL_CURSOR_DOWN;
-	} else if (key == jgui::JKS_CURSOR_LEFT) {
+	} else if (key == jevent::JKS_CURSOR_LEFT) {
 		symbol = NCL_SYMBOL_CURSOR_LEFT;
-	} else if (key == jgui::JKS_CURSOR_RIGHT) {
+	} else if (key == jevent::JKS_CURSOR_RIGHT) {
 		symbol = NCL_SYMBOL_CURSOR_RIGHT;
-	} else if (key == jgui::JKS_CURSOR_UP) {
+	} else if (key == jevent::JKS_CURSOR_UP) {
 		symbol = NCL_SYMBOL_CURSOR_UP;
-	} else if (key == jgui::JKS_CHANNEL_DOWN) {
+	} else if (key == jevent::JKS_CHANNEL_DOWN) {
 		symbol = NCL_SYMBOL_CHANNEL_DOWN;
-	} else if (key == jgui::JKS_CHANNEL_UP) {
+	} else if (key == jevent::JKS_CHANNEL_UP) {
 		symbol = NCL_SYMBOL_CHANNEL_UP;
-	} else if (key == jgui::JKS_VOLUME_DOWN) {
+	} else if (key == jevent::JKS_VOLUME_DOWN) {
 		symbol = NCL_SYMBOL_VOLUME_DOWN;
-	} else if (key == jgui::JKS_VOLUME_UP) {
+	} else if (key == jevent::JKS_VOLUME_UP) {
 		symbol = NCL_SYMBOL_VOLUME_UP;
-	} else if (key == jgui::JKS_ENTER) {
+	} else if (key == jevent::JKS_ENTER) {
 		symbol = NCL_SYMBOL_ENTER;
-	} else if (key == jgui::JKS_RED || key == jgui::JKS_F1) {
+	} else if (key == jevent::JKS_RED || key == jevent::JKS_F1) {
 		symbol = NCL_SYMBOL_RED;
-	} else if (key == jgui::JKS_GREEN || key == jgui::JKS_F2) {
+	} else if (key == jevent::JKS_GREEN || key == jevent::JKS_F2) {
 		symbol = NCL_SYMBOL_GREEN;
-	} else if (key == jgui::JKS_YELLOW || key == jgui::JKS_F3) {
+	} else if (key == jevent::JKS_YELLOW || key == jevent::JKS_F3) {
 		symbol = NCL_SYMBOL_YELLOW;
-	} else if (key == jgui::JKS_BLUE || key == jgui::JKS_F4) {
+	} else if (key == jevent::JKS_BLUE || key == jevent::JKS_F4) {
 		symbol = NCL_SYMBOL_BLUE;
-	} else if (key == jgui::JKS_BACK) {
+	} else if (key == jevent::JKS_BACK) {
 		symbol = NCL_SYMBOL_BACK;
-	} else if (key == jgui::JKS_EXIT) {
+	} else if (key == jevent::JKS_EXIT) {
 		symbol = NCL_SYMBOL_EXIT;
-	} else if (key == jgui::JKS_POWER) {
+	} else if (key == jevent::JKS_POWER) {
 		symbol = NCL_SYMBOL_POWER;
-	} else if (key == jgui::JKS_REWIND) {
+	} else if (key == jevent::JKS_REWIND) {
 		symbol = NCL_SYMBOL_REWIND;
-	} else if (key == jgui::JKS_STOP) {
+	} else if (key == jevent::JKS_STOP) {
 		symbol = NCL_SYMBOL_STOP;
-	} else if (key == jgui::JKS_EJECT) {
+	} else if (key == jevent::JKS_EJECT) {
 		symbol = NCL_SYMBOL_EJECT;
-	} else if (key == jgui::JKS_PLAY) {
+	} else if (key == jevent::JKS_PLAY) {
 		symbol = NCL_SYMBOL_PLAY;
-	} else if (key == jgui::JKS_RECORD) {
+	} else if (key == jevent::JKS_RECORD) {
 		symbol = NCL_SYMBOL_RECORD;
-	} else if (key == jgui::JKS_PAUSE) {
+	} else if (key == jevent::JKS_PAUSE) {
 		symbol = NCL_SYMBOL_PAUSE;
-	} else if (key == jgui::JKS_ESCAPE) {
+	} else if (key == jevent::JKS_ESCAPE) {
 		symbol = NCL_SYMBOL_EXIT;
-	} else if (key == jgui::JKS_A) {
+	} else if (key == jevent::JKS_A) {
 		symbol = NCL_SYMBOL_A;
-	} else if (key == jgui::JKS_B) {
+	} else if (key == jevent::JKS_B) {
 		symbol = NCL_SYMBOL_B;
-	} else if (key == jgui::JKS_C) {
+	} else if (key == jevent::JKS_C) {
 		symbol = NCL_SYMBOL_C;
-	} else if (key == jgui::JKS_D) {
+	} else if (key == jevent::JKS_D) {
 		symbol = NCL_SYMBOL_D;
-	} else if (key == jgui::JKS_E) {
+	} else if (key == jevent::JKS_E) {
 		symbol = NCL_SYMBOL_E;
-	} else if (key == jgui::JKS_F) {
+	} else if (key == jevent::JKS_F) {
 		symbol = NCL_SYMBOL_F;
-	} else if (key == jgui::JKS_G) {
+	} else if (key == jevent::JKS_G) {
 		symbol = NCL_SYMBOL_G;
-	} else if (key == jgui::JKS_H) {
+	} else if (key == jevent::JKS_H) {
 		symbol = NCL_SYMBOL_H;
-	} else if (key == jgui::JKS_I) {
+	} else if (key == jevent::JKS_I) {
 		symbol = NCL_SYMBOL_I;
-	} else if (key == jgui::JKS_J) {
+	} else if (key == jevent::JKS_J) {
 		symbol = NCL_SYMBOL_J;
-	} else if (key == jgui::JKS_K) {
+	} else if (key == jevent::JKS_K) {
 		symbol = NCL_SYMBOL_K;
-	} else if (key == jgui::JKS_L) {
+	} else if (key == jevent::JKS_L) {
 		symbol = NCL_SYMBOL_L;
-	} else if (key == jgui::JKS_M) {
+	} else if (key == jevent::JKS_M) {
 		symbol = NCL_SYMBOL_M;
-	} else if (key == jgui::JKS_N) {
+	} else if (key == jevent::JKS_N) {
 		symbol = NCL_SYMBOL_N;
-	} else if (key == jgui::JKS_O) {
+	} else if (key == jevent::JKS_O) {
 		symbol = NCL_SYMBOL_O;
-	} else if (key == jgui::JKS_P) {
+	} else if (key == jevent::JKS_P) {
 		symbol = NCL_SYMBOL_P;
-	} else if (key == jgui::JKS_Q) {
+	} else if (key == jevent::JKS_Q) {
 		symbol = NCL_SYMBOL_Q;
-	} else if (key == jgui::JKS_R) {
+	} else if (key == jevent::JKS_R) {
 		symbol = NCL_SYMBOL_R;
-	} else if (key == jgui::JKS_S) {
+	} else if (key == jevent::JKS_S) {
 		symbol = NCL_SYMBOL_S;
-	} else if (key == jgui::JKS_T) {
+	} else if (key == jevent::JKS_T) {
 		symbol = NCL_SYMBOL_T;
-	} else if (key == jgui::JKS_U) {
+	} else if (key == jevent::JKS_U) {
 		symbol = NCL_SYMBOL_U;
-	} else if (key == jgui::JKS_V) {
+	} else if (key == jevent::JKS_V) {
 		symbol = NCL_SYMBOL_V;
-	} else if (key == jgui::JKS_W) {
+	} else if (key == jevent::JKS_W) {
 		symbol = NCL_SYMBOL_W;
-	} else if (key == jgui::JKS_X) {
+	} else if (key == jevent::JKS_X) {
 		symbol = NCL_SYMBOL_X;
-	} else if (key == jgui::JKS_Y) {
+	} else if (key == jevent::JKS_Y) {
 		symbol = NCL_SYMBOL_Y;
-	} else if (key == jgui::JKS_Z) {
+	} else if (key == jevent::JKS_Z) {
 		symbol = NCL_SYMBOL_Z;
 	}
 

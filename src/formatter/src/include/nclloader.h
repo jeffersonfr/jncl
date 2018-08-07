@@ -20,8 +20,9 @@
 #ifndef J_NCLLOADER_H
 #define J_NCLLOADER_H
 
-#include "jxmlparser.h"
 #include "nclenviroment.h"
+
+#include "jcommon/jxmlparser.h"
 
 #include <string>
 #include <vector>

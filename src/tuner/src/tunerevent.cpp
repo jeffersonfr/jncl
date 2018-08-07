@@ -22,7 +22,7 @@
 namespace tuner {
 
 TunerEvent::TunerEvent(void *source, Channel *channel, tuner_event_t type):
-	jcommon::EventObject(source)
+	jevent::EventObject(source)
 {
 	_channel = channel;
 	_type = type;

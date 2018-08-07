@@ -48,18 +48,18 @@ http://www.lavid.ufpb.br
 #ifndef DEMUXEXCEPTION_H_
 #define DEMUXEXCEPTION_H_
 
-#include "jruntimeexception.h"
+#include "jexception/jruntimeexception.h"
 
 #include <iostream>
 #include <stdexcept>
 
 namespace demux{
 
-class DemuxException: public jcommon::RuntimeException{
+class DemuxException: public jexception::RuntimeException {
 
 	public:
 		DemuxException(std::string reason):
-			jcommon::RuntimeException(reason)
+			jexception::RuntimeException(reason)
 		{
 		}
 		

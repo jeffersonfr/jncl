@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "filemediabank.h"
-#include "jautolock.h"
 
 #include <iostream>
 
@@ -41,11 +40,12 @@ FileMediaBank::FileMediaBank():
 	
 	_read_index = 0;
 	_pass_index = 0;
-	_flag = true;
+	_running = true;
 	_packet_index = 0;
 	_packet_max = 0;
+  _running = false;
 
-	_buffer = new jthread::IndexedBuffer(4096, 188*7);
+	_buffer = new jshared::IndexedBuffer(4096, 188*7);
 	_packet = new char[188*7];
 }
 
@@ -55,17 +55,17 @@ FileMediaBank::~FileMediaBank()
 
 void FileMediaBank::SetLocator(Locator *locator)
 {
-	jthread::AutoLock lock(&_mutex);
-
 	if (locator == NULL) {
 		return;
 	}
 
-	try {
-		_flag = false;
+  _mutex.lock();
 
-		if (IsRunning() == true) {
-			WaitThread();
+	try {
+		_running = false;
+
+		if (_running == true) {
+			_thread.join();
 		}
 
 		if (_file != NULL) {
@@ -78,17 +78,17 @@ void FileMediaBank::SetLocator(Locator *locator)
 
 		_file = new jio::FileInputStream(locator->GetPath());
 			
-		_flag = true;
-
-		Start();
+		_thread = std::thread(&FileMediaBank::Run, this);
 	} catch (...) {
 		_file = NULL;
 	}
+
+  _mutex.unlock();
 }
 
 long long FileMediaBank::Available()
 {
-	jthread::AutoLock lock(&_mutex);
+  std::unique_lock<std::mutex> lock(_mutex);
 
 	if (_file != NULL) {
 		return _file->Available();
@@ -99,7 +99,7 @@ long long FileMediaBank::Available()
 
 long long FileMediaBank::GetCapacity()
 {
-	jthread::AutoLock lock(&_mutex);
+  std::unique_lock<std::mutex> lock(_mutex);
 
 	if (_file != NULL) {
 		return _file->GetSize();
@@ -114,7 +114,7 @@ void FileMediaBank::Open()
 
 void FileMediaBank::Reset()
 {
-	jthread::AutoLock lock(&_mutex);
+  std::unique_lock<std::mutex> lock(_mutex);
 
 	if (_file != NULL) {
 		return _file->Reset();
@@ -122,7 +122,7 @@ void FileMediaBank::Reset()
 	
 	_read_index = 0;
 	_pass_index = 0;
-	_flag = true;
+	_running = true;
 	_packet_index = 0;
 	_packet_max = 0;
 	
@@ -137,7 +137,7 @@ int FileMediaBank::AddData(char *data, int size)
 int FileMediaBank::GetData(char *data, int size)
 {
 	/*
-	jthread::AutoLock lock(&_mutex);
+  std::unique_lock<std::mutex> lock(_mutex);
 
 	if (_file != NULL) {
 		int r = _file->Read(data, size);
@@ -154,9 +154,11 @@ int FileMediaBank::GetData(char *data, int size)
 	return -1;
 	*/
 
-	jthread::jbuffer_chunk_t t;
-	int r, 
-			d = _packet_max - _packet_index;
+	jshared::jbuffer_chunk_t 
+    t;
+	int 
+    r, 
+		d = _packet_max - _packet_index;
 
 	if (d > 0) {
 		if (size <= d) {
@@ -194,6 +196,7 @@ int FileMediaBank::GetData(char *data, int size)
 
 void FileMediaBank::Run() 
 {
+
 	/*
 	int r,
 			size = 7*188;
@@ -215,7 +218,7 @@ void FileMediaBank::Run()
 		addData(receive, r);
 
 		usleep(100000);
-	} while (_flag == true);
+	} while (_running == true);
 	*/
 }
 

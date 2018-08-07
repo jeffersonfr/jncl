@@ -47,9 +47,11 @@ http://www.lavid.ufpb.br
 *******************************************************************************/
 #include "source.h"
 
+#include <string.h>
+
 namespace demux {
 
-Source::Source(jthread::IndexedBuffer *b)
+Source::Source(jshared::IndexedBuffer *b)
 {
 	this->buffer = b;
 
@@ -64,7 +66,7 @@ Source::Source(jthread::IndexedBuffer *b)
 
 int Source::read(char *data, int size)
 {
-	jthread::jbuffer_chunk_t t;
+	jshared::jbuffer_chunk_t t;
 	int r, 
 			d = _packet_max - _packet_index;
 

@@ -21,10 +21,8 @@
 #include "nclselectionevent.h"
 #include "nclinput.h"
 
-#include "jautolock.h"
-#include "jdate.h"
-
 #include <sstream>
+#include <thread>
 
 NCLLuaEventBinding::NCLLuaEventBinding()
 {
@@ -256,7 +254,7 @@ int NCLLuaEventBinding::post(lua_State *L)
 
 int NCLLuaEventBinding::uptime(lua_State *L)
 {
-	lua_pushnumber(L, jcommon::Date::CurrentTimeMillis());
+	lua_pushnumber(L, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());
 
 	return 1;
 }

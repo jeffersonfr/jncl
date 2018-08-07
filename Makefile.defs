@@ -26,12 +26,11 @@ CFLAGS		+= \
 
 INCLUDE		+= \
 						 -I$(INCDIR) \
-						 `pkg-config --cflags jlibcpp` \
+						 `pkg-config --cflags jlibcpp lua5.3` \
 
 LIBRARY 	+= \
 						 -L$(LIBDIR) \
-						 `pkg-config --libs jlibcpp` \
-						 /usr/local/lib/liblua.a \
+						 `pkg-config --libs jlibcpp lua5.3` \
 
 DEFINES		+= \
 						 -DHAS_NCL \

@@ -20,7 +20,7 @@
 #ifndef TUNEREXCEPTION_H
 #define TUNEREXCEPTION_H
 
-#include "jexception.h"
+#include "jexception/jexception.h"
 
 #include <stdexcept>
 #include <string>
@@ -32,30 +32,24 @@ namespace tuner {
  * 
  * \author Jeff Ferr
  */
-class TunerException : public jcommon::Exception, std::runtime_error{
+class TunerException : public jexception::Exception {
 
 	private:
 
 	protected:
 
 	public:
-        /**
-        * \brief Construtor.
-        *
-        */
-        TunerException(std::string reason);
-        
-        /**
-        * \brief Destrutor virtual.
-        *
-        */
-        virtual ~TunerException() throw();
+    /**
+     * \brief Construtor.
+     *
+     */
+    TunerException(std::string reason);
 
-		/**
-		 * \brief
-		 *
-		 */
-		virtual std::string what();
+    /**
+     * \brief Destrutor virtual.
+     *
+     */
+    virtual ~TunerException() throw();
 
 };
 

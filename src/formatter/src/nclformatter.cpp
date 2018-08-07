@@ -32,8 +32,6 @@
 #include "nclpresentationevent.h"
 #include "nclinput.h"
 
-#include "jautolock.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,8 +42,7 @@ namespace jncl {
 NCLPlayer *_player = NULL;
 
 NCLFormatter::NCLFormatter(std::string uri, int width, int height):
-	NCLEventListener(),
-	jthread::Thread()
+	NCLEventListener()
 {
 	std::string maindocument = uri,
 		basedirectory;
@@ -89,7 +86,7 @@ NCLFormatter::~NCLFormatter()
 {
 	NCLInput::GetInstance()->RemoveEventListener(this);
 
-	jthread::AutoLock lock(&_mutex);
+  _mutex.lock();
 
 	for (std::map<std::string, NCLPlayer *>::iterator i=_players.begin(); i!=_players.end(); i++) {
 		NCLPlayer *player = i->second;
@@ -101,8 +98,7 @@ NCLFormatter::~NCLFormatter()
 		delete _loader;
 	}
 
-	// TODO::
-	// delete _enviroment
+  _mutex.unlock();
 }
 
 NCLPlayer * NCLFormatter::GetPlayer(struct nclcontext_t *ctx, std::string id)
@@ -216,8 +212,6 @@ void NCLFormatter::LoadPresentation()
 
 void NCLFormatter::StartPresentation()
 {
-	jthread::AutoLock lock(&_mutex);
-
 	if (_loader == NULL) {
 		throw NCLException("Null pointer exeception");
 	}
@@ -228,9 +222,11 @@ void NCLFormatter::StartPresentation()
 
 	lports.push_back(&(ctx->ports));
 
-	Start();
+  _thread = std::thread(&NCLFormatter::Run, this);
 
 	do {
+    // TODO:: mutex ??
+    
 		std::vector<struct nclport_t *> *ports = (*lports.begin());
 
 		for (std::vector<struct nclport_t *>::iterator i=ports->begin(); i!=ports->end(); i++) {
@@ -264,14 +260,10 @@ void NCLFormatter::StartPresentation()
 
 void NCLFormatter::StopPresentation()
 {
-	jthread::AutoLock lock(&_mutex);
-
 }
 
 void NCLFormatter::PausePresentation()
 {
-	jthread::AutoLock lock(&_mutex);
-
 	if (_loader == NULL) {
 		throw NCLException("Null pointer exeception");
 	}
@@ -279,8 +271,6 @@ void NCLFormatter::PausePresentation()
 
 void NCLFormatter::ResumePresentation()
 {
-	jthread::AutoLock lock(&_mutex);
-
 	if (_loader == NULL) {
 		throw NCLException("Null pointer exeception");
 	}
@@ -294,12 +284,14 @@ void NCLFormatter::Release()
 
 void NCLFormatter::Wait()
 {
-	_semaphore.Wait();
+ std::unique_lock<std::mutex> lock(_mutex);
+	
+ _semaphore.wait(lock);
 }
 
 void NCLFormatter::Notify()
 {
-	_semaphore.Notify();
+	_semaphore.notify_all();
 }
 
 void NCLFormatter::DoAction(std::vector<struct nclbind_t *> *binds)
@@ -356,25 +348,27 @@ void NCLFormatter::DoAction(std::vector<struct nclbind_t *> *binds)
 }
 
 std::vector<NCLEvent *> _events;
-jthread::Condition _sem;
+std::condition_variable _sem;
 
 void NCLFormatter::ActionPerformed(NCLEvent *event)
 {
-	jthread::AutoLock lock(&_mutex);
+  _mutex.lock();
 
 	_events.push_back(event);
 
-	_sem.Notify();
+	_sem.notify_all();
+  
+  _mutex.unlock();
 }
 
 void NCLFormatter::Run()
 {
 	do {
-		while (_events.size() == 0) {
-			_sem.Wait();
-		}
+    std::unique_lock<std::mutex> lock(_mutex);
 
-		jthread::AutoLock lock(&_mutex);
+		while (_events.size() == 0) {
+			_sem.wait(lock);
+		}
 
 		NCLEvent *event = *(_events.begin());
 
@@ -384,7 +378,7 @@ void NCLFormatter::Run()
 			NCLSelectionEvent *nclevent = (NCLSelectionEvent *)event;
 
 			if (nclevent->GetSymbol() == NCL_SYMBOL_EXIT) {
-				_semaphore.Notify();
+				_semaphore.notify_all();
 			} else {
 				std::vector<NCLPlayer *> players;
 				int zindex = -1;

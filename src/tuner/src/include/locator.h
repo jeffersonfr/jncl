@@ -20,7 +20,7 @@
 #ifndef LOCATOR_H
 #define LOCATOR_H
 
-#include "jurl.h"
+#include "jnetwork/jurl.h"
 
 #include <stdint.h>
 
@@ -31,7 +31,7 @@ namespace tuner {
  * 
  * \author Jeff Ferr
  */
-class Locator : public jcommon::URL{
+class Locator : public jnetwork::URL {
 
 	private:
 
