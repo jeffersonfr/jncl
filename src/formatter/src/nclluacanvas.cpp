@@ -79,7 +79,7 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(std::string image, int wp, int hp)
 
 	_image = new jgui::BufferedImage(image);
 	
-  jgui::jsize_t 
+  jgui::jsize_t<int> 
     isize = _image->GetSize();
 
 	if (wp <= 0) {
@@ -108,7 +108,7 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(int wp, int hp)
 	_size.width = wp;
 	_size.height = hp;
 
-	_image = new jgui::BufferedImage(jgui::JPF_ARGB, wp, hp);
+	_image = new jgui::BufferedImage(jgui::JPF_ARGB, {wp, hp});
 	_graphics = _image->GetGraphics();
 }
 
@@ -244,7 +244,7 @@ int NCLLuaCanvasBinding::clip(lua_State *L)
 			w = (int)luaL_checknumber(L, 4),
 			h = (int)luaL_checknumber(L, 5);
 
-		a->_graphics->SetClip(x, y, w, h);
+		a->_graphics->SetClip({x, y, w, h});
 	} else {
 		jgui::jregion_t t = a->_graphics->GetClip();
 
@@ -275,7 +275,7 @@ int NCLLuaCanvasBinding::color(lua_State *L)
 			b1 = (int)luaL_checknumber(L, 4),
 			a1 = (int)luaL_checknumber(L, 5);
 
-			a->_graphics->SetColor(r1, g1, b1, a1);
+			a->_graphics->SetColor({r1, g1, b1, a1});
 	} else if (lua_type(L, 2) == LUA_TSTRING) {
 		const char *name = (char*)luaL_checkstring(L, 2);
 		uint32_t color = jncl::NCLHelper::ParseColor(name);
@@ -284,7 +284,7 @@ int NCLLuaCanvasBinding::color(lua_State *L)
 			b1 = (color>>0)&0xff,
 			a1 = (color>>24)&0xff;
 
-		a->_graphics->SetColor(r1, g1, b1, a1);
+		a->_graphics->SetColor({r1, g1, b1, a1});
 	} else {
 		jgui::Color color = a->_graphics->GetColor();
 
@@ -447,7 +447,7 @@ int NCLLuaCanvasBinding::line(lua_State *L)
 		x2 = (int)luaL_checknumber(L, 4),
 		y2 = (int)luaL_checknumber(L, 5);
 
-	a->_graphics->DrawLine(x1, y1, x2, y2);
+	a->_graphics->DrawLine({{x1, y1}, {x2, y2}});
 
 	return 0;
 }
@@ -471,9 +471,9 @@ int NCLLuaCanvasBinding::arc(lua_State *L)
 		   end = (double)luaL_checknumber(L, 8);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->_graphics->FillArc(x, y, rx, ry, start, end);
+		a->_graphics->FillArc({x, y}, {rx, ry}, start, end);
 	} else {
-		a->_graphics->DrawArc(x, y, rx, ry, start, end);
+		a->_graphics->DrawArc({x, y}, {rx, ry}, start, end);
 	}
 
 	return 0;
@@ -495,9 +495,9 @@ int NCLLuaCanvasBinding::circle(lua_State *L)
 		r = (int)luaL_checknumber(L, 5);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->_graphics->FillCircle(x, y, r);
+		a->_graphics->FillCircle({x, y}, r);
 	} else {
-		a->_graphics->DrawCircle(x, y, r);
+		a->_graphics->DrawCircle({x, y}, r);
 	}
 
 	return 0;
@@ -520,9 +520,9 @@ int NCLLuaCanvasBinding::ellipse(lua_State *L)
 		ry = (int)luaL_checknumber(L, 6);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->_graphics->FillArc(x, y, rx, ry, 0, 360);
+		a->_graphics->FillArc({x, y}, {rx, ry}, 0, 360);
 	} else {
-		a->_graphics->DrawArc(x, y, rx, ry, 0, 360);
+		a->_graphics->DrawArc({x, y}, {rx, ry}, 0, 360);
 	}
 
 	return 0;
@@ -545,9 +545,9 @@ int NCLLuaCanvasBinding::drawRect(lua_State *L)
 		h = (int)luaL_checknumber(L, 6);
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->_graphics->FillRectangle(x, y, w, h);
+		a->_graphics->FillRectangle({x, y, w, h});
 	} else {
-		a->_graphics->DrawRectangle(x, y, w, h);
+		a->_graphics->DrawRectangle({x, y, w, h});
 	}
 
 	return 0;
@@ -573,9 +573,9 @@ int NCLLuaCanvasBinding::triangle(lua_State *L)
 
 
 	if (strcasecmp(type, "fill") == 0) {
-		a->_graphics->FillTriangle(p1x, p1y, p2x, p2y, p3x, p3y);
+		a->_graphics->FillTriangle({p1x, p1y}, {p2x, p2y}, {p3x, p3y});
 	} else {
-		a->_graphics->DrawTriangle(p1x, p1y, p2x, p2y, p3x, p3y);
+		a->_graphics->DrawTriangle({p1x, p1y}, {p2x, p2y}, {p3x, p3y});
 	}
 
 	return 0;
@@ -594,19 +594,19 @@ int NCLLuaCanvasBinding::polygon(lua_State *L)
 
 		length = ((length-4)/2);
 
-		jgui::jpoint_t p[length];
-		int x = (int)luaL_checknumber(L, 3),
+    std::vector<jgui::jpoint_t<int>> p;
+		int 
+      x = (int)luaL_checknumber(L, 3),
 			y = (int)luaL_checknumber(L, 4);
 
 		for (int i=0; i<length; i++) {
-			p[i].x = (int)luaL_checknumber(L, 5+i*2+0);
-			p[i].y = (int)luaL_checknumber(L, 5+i*2+1);
+      p.emplace_back(jgui::jpoint_t<int>{(int)luaL_checknumber(L, 5+i*2+0), (int)luaL_checknumber(L, 5+i*2+1)});
 		}
 
 		if (strcasecmp(type, "fill") == 0) {
-			a->_graphics->FillPolygon(x, y, p, length);
+			a->_graphics->FillPolygon({x, y}, p);
 		} else {
-			a->_graphics->DrawPolygon(x, y, p, length, true);
+			a->_graphics->DrawPolygon({x, y}, p, true);
 		}
 	}
 	
@@ -632,7 +632,7 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 		if (img != NULL) {
 			jgui::Image *image = new jgui::BufferedImage(img);
 
-			a->_graphics->DrawImage(image, x, y);
+			a->_graphics->DrawImage(image, jgui::jpoint_t<int>{x, y});
 
 			delete image;
 		}
@@ -646,7 +646,7 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 		if (img != NULL) {
 			jgui::Image *image = new jgui::BufferedImage(img);
 
-			a->_graphics->DrawImage(image, x, y, w, h);
+			a->_graphics->DrawImage(image, {x, y, w, h});
 
 			delete image;
 		}
@@ -664,7 +664,7 @@ int NCLLuaCanvasBinding::drawimage(lua_State *L)
 		if (img != NULL) {
 			jgui::Image *image = new jgui::BufferedImage(img);
 
-			a->_graphics->DrawImage(image, sx, sy, sw, sh, x, y, w, h);
+			a->_graphics->DrawImage(image, {sx, sy, sw, sh}, {x, y, w, h});
 
 			delete image;
 		}
@@ -690,7 +690,7 @@ int NCLLuaCanvasBinding::clear(lua_State *L)
 				h = (int)luaL_checknumber(L, 5);
 
 		if (a->_graphics != NULL) {
-			a->_graphics->Clear(x, y, w, h);
+			a->_graphics->Clear({x, y, w, h});
 		}
 	}
 
@@ -714,7 +714,7 @@ int NCLLuaCanvasBinding::compose(lua_State *L)
 {
 	//jthread::AutoLock lock(&NCLLuaEventBinding::event_mutex);
 
-	NCLLuaCanvasBinding *c1 = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
+	// NCLLuaCanvasBinding *c1 = *((NCLLuaCanvasBinding **)NCLLuaObjectBinding::GetPointer(L, 1, className));
 
 	if (NCLLuaObjectBinding::GetPointer(L, 4, className) == NULL) {
 		return luaL_argerror(L, 4, "invalid canvas parameter (nil)");
@@ -774,12 +774,12 @@ int NCLLuaCanvasBinding::drawstring(lua_State *L)
 
 	if (a->_graphics != NULL) {
 		if (lua_gettop(L) == 4) {
-			a->_graphics->DrawString(std::string(text), x, y);
+			a->_graphics->DrawString(std::string(text), jgui::jpoint_t<int>{x, y});
 		} else if (lua_gettop(L) == 6) {
 			int w = (int)luaL_checknumber(L, 5),
 				h = (int)luaL_checknumber(L, 6);
 
-			a->_graphics->DrawString(std::string(text), x, y, w, h);//, 0);
+			a->_graphics->DrawString(std::string(text), {x, y, w, h}); //, 0);
 		} else if (lua_gettop(L) == 7) {
 			int w = (int)luaL_checknumber(L, 5),
 				h = (int)luaL_checknumber(L, 6);
@@ -797,7 +797,7 @@ int NCLLuaCanvasBinding::drawstring(lua_State *L)
 				align = jgui::JHA_JUSTIFY;
 			}
 
-			a->_graphics->DrawString(std::string(text), x, y, w, h, align);
+			a->_graphics->DrawString(std::string(text), {x, y, w, h}, align);
 		}
 	}
 

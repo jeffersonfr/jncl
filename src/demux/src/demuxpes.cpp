@@ -66,16 +66,16 @@ DemuxPES::~DemuxPES()
 int DemuxPES::readStream(char *buffer, int size)
 {
 	unsigned char *payload;
-	int lido,
-			payloadSize,
-			pesSize,
-			pesOffset=0;
+	int 
+		payloadSize,
+		pesSize,
+		pesOffset=0;
 	char packet[188];
 	bool newPacket=true;
 
 	while(true){
 		memset(packet,0,188);
-		lido = readPacket(packet);
+		// lido = readPacket(packet);
 
 		payload = (unsigned char *)Packet::getPayloadCopy(packet);
 		payloadSize = Packet::getPayloadLength(packet);

@@ -248,16 +248,16 @@ class NCLLoader{
 
 		bool InnerParser(std::string file);
 
-		bool InnerParserHead(jcommon::XmlElement *element);
-		bool InnerParserBody(jcommon::XmlElement *element);
+		bool InnerParserHead(jcommon::XMLElement *element);
+		bool InnerParserBody(jcommon::XMLElement *element);
 		
-		bool InnerParserRegionBase(std::string alias, std::string uri, jcommon::XmlElement *element);
-		bool InnerParserDescriptorBase(std::string alias, std::string uri, jcommon::XmlElement *element);
-		bool InnerParserConnectorBase(std::string alias, std::string uri, jcommon::XmlElement *element);
+		bool InnerParserRegionBase(std::string alias, std::string uri, jcommon::XMLElement *element);
+		bool InnerParserDescriptorBase(std::string alias, std::string uri, jcommon::XMLElement *element);
+		bool InnerParserConnectorBase(std::string alias, std::string uri, jcommon::XMLElement *element);
 		
-		bool InnerParserPort(struct nclcontext_t *parent, jcommon::XmlElement *context);
-		bool InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement *context);
-		bool InnerParserMedia(struct nclcontext_t *parent, jcommon::XmlElement *context);
+		bool InnerParserPort(struct nclcontext_t *parent, jcommon::XMLElement *context);
+		bool InnerParserLink(struct nclcontext_t *parent, jcommon::XMLElement *context);
+		bool InnerParserMedia(struct nclcontext_t *parent, jcommon::XMLElement *context);
 
 		void InnerRegionCalculate(struct nclregion_t *parent, struct nclregion_t *t, std::string left, std::string top, std::string right, std::string bottom, std::string width, std::string height);
 

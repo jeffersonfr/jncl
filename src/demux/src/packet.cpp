@@ -122,9 +122,8 @@ Packet::~Packet()
 char* Packet::getPayloadBeginingAtUnitStarted( char* packet)
 {
 	int payloadIndex = 4 + (Packet::hasAdaptationField(packet) ? 1 : 0) + Packet::getAdaptationFieldLength(packet);
-	int size;
 	if ( Packet::hasPointerField(packet) ) {
-		size = TS_PACKET_SIZE - payloadIndex - 1 - (Packet::getPointerField(packet));
+		// int size = TS_PACKET_SIZE - payloadIndex - 1 - (Packet::getPointerField(packet));
 
 		/*unsigned char * payload = (unsigned char *)malloc(sizeof(unsigned char)*size);*/
 

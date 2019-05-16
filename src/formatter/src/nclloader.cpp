@@ -115,15 +115,15 @@ bool NCLLoader::InnerParser(std::string file)
 {
 	JDEBUG(JINFO, "# begin\n");
 
-	jcommon::XmlDocument doc(file);
+	jcommon::XMLDocument doc;
 
-	if (!doc.LoadFile()) {
+	if (!doc.LoadFile(file.c_str())) {
 		JDEBUG(JERROR, "file \"%s\" is not a ncl document\n", file.c_str());
 		
 		return false;
 	}
 
-	jcommon::XmlElement *root;
+	jcommon::XMLElement *root;
 
 	root = doc.RootElement();
 
@@ -144,7 +144,7 @@ bool NCLLoader::InnerParser(std::string file)
 	return true;
 }
 
-bool NCLLoader::InnerParserHead(jcommon::XmlElement *element)
+bool NCLLoader::InnerParserHead(jcommon::XMLElement *element)
 {
 	if (element == NULL) {
 		return false;
@@ -152,7 +152,7 @@ bool NCLLoader::InnerParserHead(jcommon::XmlElement *element)
 
 	JDEBUG(JINFO, "# begin\n");
 
-	jcommon::XmlElement *psg = element->FirstChildElement();
+	jcommon::XMLElement *psg = element->FirstChildElement();
 
 	if (psg == NULL) {
 		JDEBUG(JERROR, "not children in head\n");
@@ -183,7 +183,7 @@ bool NCLLoader::InnerParserHead(jcommon::XmlElement *element)
 	return true;
 }
 
-bool NCLLoader::InnerParserBody(jcommon::XmlElement *element)
+bool NCLLoader::InnerParserBody(jcommon::XMLElement *element)
 {
 	JDEBUG(JINFO, "# begin\n");
 
@@ -193,14 +193,14 @@ bool NCLLoader::InnerParserBody(jcommon::XmlElement *element)
 		return false;
 	}
 
-	std::vector<jcommon::XmlElement *> contexts;
+	std::vector<jcommon::XMLElement *> contexts;
 
 	contexts.push_back(element);
 
 	// struct nclcontext_t *parent = NULL;
 
 	do {
-		jcommon::XmlElement *psg = (*contexts.begin()),
+		jcommon::XMLElement *psg = (*contexts.begin()),
 			*context = psg->FirstChildElement();
 
 		if (context == NULL) {
@@ -238,7 +238,7 @@ bool NCLLoader::InnerParserBody(jcommon::XmlElement *element)
 			if (strcasecmp(context->Value(), "context") == 0) {
 				std::string id;
 
-				jcommon::XmlAttribute *attr = context->FirstAttribute();
+				const jcommon::XMLAttribute *attr = context->FirstAttribute();
 
 				while (attr != NULL) {
 					ATTRIBUTE(id);
@@ -246,7 +246,7 @@ bool NCLLoader::InnerParserBody(jcommon::XmlElement *element)
 					attr = attr->Next();
 				}
 
-				if (context->HasChildren() == true) {
+				if (context->NoChildren() == false) {
 					contexts.push_back(context);
 				}
 
@@ -279,7 +279,7 @@ bool NCLLoader::InnerParserBody(jcommon::XmlElement *element)
 	return true;
 }
 
-bool NCLLoader::InnerParserPort(struct nclcontext_t *parent, jcommon::XmlElement *context)
+bool NCLLoader::InnerParserPort(struct nclcontext_t *parent, jcommon::XMLElement *context)
 {
 	if (context == NULL) {
 		JDEBUG(JWARN, "link node is null\n");
@@ -291,7 +291,7 @@ bool NCLLoader::InnerParserPort(struct nclcontext_t *parent, jcommon::XmlElement
 		component,
 		interface;
 
-	jcommon::XmlAttribute *attr = context->FirstAttribute();
+	const jcommon::XMLAttribute *attr = context->FirstAttribute();
 
 	while (attr != NULL) {
 		ATTRIBUTE(id);
@@ -317,7 +317,7 @@ bool NCLLoader::InnerParserPort(struct nclcontext_t *parent, jcommon::XmlElement
 	return true;
 }
 
-bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement *context)
+bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XMLElement *context)
 {
 	if (context == NULL) {
 		JDEBUG(JWARN, "link node is null\n");
@@ -325,7 +325,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 		return false;
 	}
 
-	if (context->HasChildren() == false) {
+	if (context->NoChildren() == true) {
 		JDEBUG(JERROR, "link has no children\n");
 
 		return false;
@@ -334,7 +334,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 	std::string id,
 		xconnector;
 
-	jcommon::XmlAttribute *attr = context->FirstAttribute();
+	const jcommon::XMLAttribute *attr = context->FirstAttribute();
 
 	while (attr != NULL) {
 		ATTRIBUTE(id);
@@ -351,7 +351,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 
 	JDEBUG(JINFO, "<link id=%s xconnector=%s>\n", id.c_str(), xconnector.c_str());
 
-	jcommon::XmlElement *elos = context->FirstChildElement();
+	jcommon::XMLElement *elos = context->FirstChildElement();
 
 	if (elos == NULL) {
 		JDEBUG(JINFO, "link has no children\n");
@@ -364,7 +364,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 			std::string name,
 				value;
 
-			jcommon::XmlAttribute *attr = elos->FirstAttribute();
+			const jcommon::XMLAttribute *attr = elos->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(name);
@@ -390,7 +390,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 				interface, 
 				descriptor;
 
-			jcommon::XmlAttribute *attr = elos->FirstAttribute();
+			const jcommon::XMLAttribute *attr = elos->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(id);
@@ -415,20 +415,20 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 
 			link->binds.push_back(bind);
 
-			if (elos->HasChildren() == false) {
+			if (elos->NoChildren() == true) {
 				// JDEBUG(JERROR, "bind has no params\n");
 
 				continue;
 			}
 
-			jcommon::XmlElement *lparams = elos->FirstChildElement();
+			jcommon::XMLElement *lparams = elos->FirstChildElement();
 
 			do {
 				if (strcasecmp(lparams->Value(), "bindparam") == 0) {
 					std::string name,
 						value;
 
-					jcommon::XmlAttribute *attr = lparams->FirstAttribute();
+					const jcommon::XMLAttribute *attr = lparams->FirstAttribute();
 
 					while (attr != NULL) {
 						ATTRIBUTE(name);
@@ -456,7 +456,7 @@ bool NCLLoader::InnerParserLink(struct nclcontext_t *parent, jcommon::XmlElement
 	return true;
 }
 
-bool NCLLoader::InnerParserMedia(struct nclcontext_t *parent, jcommon::XmlElement *context)
+bool NCLLoader::InnerParserMedia(struct nclcontext_t *parent, jcommon::XMLElement *context)
 {
 	if (context == NULL) {
 		JDEBUG(JWARN, "media node is null\n");
@@ -471,7 +471,7 @@ bool NCLLoader::InnerParserMedia(struct nclcontext_t *parent, jcommon::XmlElemen
 		refer,
 		newinstance;
 
-	jcommon::XmlAttribute *attr = context->FirstAttribute();
+	const jcommon::XMLAttribute *attr = context->FirstAttribute();
 
 	while (attr != NULL) {
 		ATTRIBUTE(id);
@@ -544,15 +544,15 @@ bool NCLLoader::InnerParserMedia(struct nclcontext_t *parent, jcommon::XmlElemen
 			}
 		}
 
-		if (context->HasChildren() == true) {
-			jcommon::XmlElement *property = context->FirstChildElement();
+		if (context->NoChildren() == false) {
+			jcommon::XMLElement *property = context->FirstChildElement();
 
 			do {
 				if (strcasecmp(property->Value(), "property") == 0) {
 					std::string name,
 						value;
 
-					jcommon::XmlAttribute *attr = property->FirstAttribute();
+					const jcommon::XMLAttribute *attr = property->FirstAttribute();
 
 					while (attr != NULL) {
 						ATTRIBUTE(name);
@@ -580,7 +580,7 @@ bool NCLLoader::InnerParserMedia(struct nclcontext_t *parent, jcommon::XmlElemen
 						begin,
 						end;
 
-					jcommon::XmlAttribute *attr = property->FirstAttribute();
+					const jcommon::XMLAttribute *attr = property->FirstAttribute();
 
 					while (attr != NULL) {
 						ATTRIBUTE(id);
@@ -622,7 +622,7 @@ bool NCLLoader::InnerParserMedia(struct nclcontext_t *parent, jcommon::XmlElemen
 	return true;
 }
 
-bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommon::XmlElement *element)
+bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommon::XMLElement *element)
 {
 	// TODO:: parse assessment
 
@@ -634,7 +634,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 		return false;
 	}
 
-	if (element->HasChildren() == false) {
+	if (element->NoChildren() == true) {
 		JDEBUG(JERROR, "regionbase has no children\n");
 
 		return false;
@@ -645,7 +645,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 	std::string id,
 		device;
 
-	jcommon::XmlAttribute *attr = element->FirstAttribute();
+	const jcommon::XMLAttribute *attr = element->FirstAttribute();
 
 	while (attr != NULL) {
 		ATTRIBUTE(id);
@@ -661,7 +661,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 	
 	JDEBUG(JINFO, "<regionbase id=%s device=%s>\n", id.c_str(), device.c_str());
 
-	std::vector<jcommon::XmlElement *> regions;
+	std::vector<jcommon::XMLElement *> regions;
 	std::vector<struct nclregion_t *> parents;
 
 	regions.push_back(element);
@@ -669,7 +669,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 	struct nclregion_t *parent = NULL;
 
 	do {
-		jcommon::XmlElement *region = (*regions.begin())->FirstChildElement();
+		jcommon::XMLElement *region = (*regions.begin())->FirstChildElement();
 
 		if (parents.size() > 0) {
 			parent = (*parents.begin());
@@ -681,7 +681,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 			std::string alias,
 				documenturi;
 
-			jcommon::XmlAttribute *attr = region->FirstAttribute();
+			const jcommon::XMLAttribute *attr = region->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(alias);
@@ -690,9 +690,11 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 				attr = attr->Next();
 			}
 
-			jcommon::XmlDocument doc(_enviroment->GetBaseDirectory() + "/" + documenturi);
+      std::string path = _enviroment->GetBaseDirectory() + "/" + documenturi;
 
-			if (!doc.LoadFile()) {
+			jcommon::XMLDocument doc;
+
+			if (!doc.LoadFile(path.c_str())) {
 				JDEBUG(JERROR, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
 
 				continue;
@@ -700,7 +702,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 
 			JDEBUG(JINFO, "<importbase alias=%s documenturi=%s>\n", alias.c_str(), documenturi.c_str());
 
-			jcommon::XmlElement *root;
+			jcommon::XMLElement *root;
 
 			root = doc.RootElement();
 
@@ -727,7 +729,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 					height,
 					zindex;
 
-				jcommon::XmlAttribute *attr = region->FirstAttribute();
+				const jcommon::XMLAttribute *attr = region->FirstAttribute();
 
 				while (attr != NULL) {
 					ATTRIBUTE(id);
@@ -754,7 +756,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 
 					base->regions.push_back(t);
 
-					if (region->HasChildren() == true) {
+					if (region->NoChildren() == false) {
 						parents.push_back(t);
 						regions.push_back(region);
 					}
@@ -777,7 +779,7 @@ bool NCLLoader::InnerParserRegionBase(std::string alias, std::string uri, jcommo
 
 
 
-bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jcommon::XmlElement *element)
+bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jcommon::XMLElement *element)
 {
 	// TODO:: parse assessment
 
@@ -789,7 +791,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 		return false;
 	}
 
-	if (element->HasChildren() == false) {
+	if (element->NoChildren() == true) {
 		JDEBUG(JERROR, "descriptorbase has no children\n");
 
 		return false;
@@ -799,7 +801,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 
 	std::string id;
 
-	jcommon::XmlAttribute *attr = element->FirstAttribute();
+	const jcommon::XMLAttribute *attr = element->FirstAttribute();
 
 	while (attr != NULL) {
 		ATTRIBUTE(id);
@@ -811,14 +813,14 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 
 	JDEBUG(JINFO, "<descriptorbase id=%s>\n", id.c_str());
 
-	jcommon::XmlElement *descriptor = element->FirstChildElement();
+	jcommon::XMLElement *descriptor = element->FirstChildElement();
 
 	do {
 		if (strcasecmp(descriptor->Value(), "importbase") == 0) {
 			std::string alias,
 				documenturi;
 
-			jcommon::XmlAttribute *attr = descriptor->FirstAttribute();
+			const jcommon::XMLAttribute *attr = descriptor->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(alias);
@@ -827,9 +829,11 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 				attr = attr->Next();
 			}
 
-			jcommon::XmlDocument doc(_enviroment->GetBaseDirectory() + "/" + documenturi);
+      std::string path = _enviroment->GetBaseDirectory() + "/" + documenturi;
 
-			if (!doc.LoadFile()) {
+			jcommon::XMLDocument doc;
+
+			if (!doc.LoadFile(path.c_str())) {
 				JDEBUG(JERROR, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
 
 				continue;
@@ -837,7 +841,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 
 			JDEBUG(JINFO, "<importbase alias=%s documenturi=%s>\n", alias.c_str(), documenturi.c_str());
 
-			jcommon::XmlElement *root;
+			jcommon::XMLElement *root;
 
 			root = doc.RootElement();
 
@@ -872,7 +876,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 				transin,
 				transout;
 
-			jcommon::XmlAttribute *attr = descriptor->FirstAttribute();
+			const jcommon::XMLAttribute *attr = descriptor->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(id);
@@ -923,7 +927,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 				JDEBUG(JINFO, "<descriptor id=%s player=%s explicitdur=%s region=%s freeze=%s focusindex=%s focusbordercolor=%s focusborderwidth=%s focusbordertransparency=%s focussrc=%s focusselsrc=%s selbordercolor=%s moveleft=%s moveup=%s moveright=%s movedown=%s transin=%s transout=%s>\n", 
 						id.c_str(), player.c_str(), explicitdur.c_str(), region.c_str(), freeze.c_str(), focusindex.c_str(), focusbordercolor.c_str(), focusborderwidth.c_str(), focusbordertransparency.c_str(), focussrc.c_str(), focusselsrc.c_str(), selbordercolor.c_str(), moveleft.c_str(), moveup.c_str(), moveright.c_str(), movedown.c_str(), transin.c_str(), transout.c_str());
 
-				jcommon::XmlElement *param = descriptor->FirstChildElement();
+				jcommon::XMLElement *param = descriptor->FirstChildElement();
 
 				if (param != NULL) {
 					std::string name,
@@ -932,7 +936,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 					do {
 						if (strcasecmp(param->Value(), "descriptorparam") == 0) {
 
-							jcommon::XmlAttribute *attr = param->FirstAttribute();
+							const jcommon::XMLAttribute *attr = param->FirstAttribute();
 
 							while (attr != NULL) {
 								ATTRIBUTE(name);
@@ -965,7 +969,7 @@ bool NCLLoader::InnerParserDescriptorBase(std::string alias, std::string uri, jc
 	return true;
 }
 
-bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jcommon::XmlElement *element)
+bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jcommon::XMLElement *element)
 {
 	// TODO:: parse assessment
 
@@ -977,7 +981,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 		return false;
 	}
 
-	if (element->HasChildren() == false) {
+	if (element->NoChildren() == true) {
 		JDEBUG(JERROR, "connectorbase has no children\n");
 
 		return false;
@@ -987,7 +991,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 
 	std::string id;
 
-	jcommon::XmlAttribute *attr = element->FirstAttribute();
+	const jcommon::XMLAttribute *attr = element->FirstAttribute();
 
 	while (attr != NULL) {
 		ATTRIBUTE(id);
@@ -1001,14 +1005,14 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 
 	JDEBUG(JINFO, "<connectorbase id=%s alias=%s>\n", id.c_str(), alias.c_str());
 
-	jcommon::XmlElement *connector = element->FirstChildElement();
+	jcommon::XMLElement *connector = element->FirstChildElement();
 
 	do {
 		if (strcasecmp(connector->Value(), "importbase") == 0) {
 			std::string alias,
 				documenturi;
 
-			jcommon::XmlAttribute *attr = connector->FirstAttribute();
+			const jcommon::XMLAttribute *attr = connector->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(alias);
@@ -1017,9 +1021,11 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 				attr = attr->Next();
 			}
 
-			jcommon::XmlDocument doc(_enviroment->GetBaseDirectory() + "/" + documenturi);
+      std::string path = _enviroment->GetBaseDirectory() + "/" + documenturi;
 
-			if (!doc.LoadFile()) {
+			jcommon::XMLDocument doc;
+
+			if (!doc.LoadFile(path.c_str())) {
 				JDEBUG(JERROR, "file \"%s\" is not a valid connectorbase\n", (_enviroment->GetBaseDirectory() + "/" + documenturi).c_str());
 
 				continue;
@@ -1027,7 +1033,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 
 			JDEBUG(JINFO, "<importbase alias=%s documenturi=%s>\n", alias.c_str(), documenturi.c_str());
 
-			jcommon::XmlElement *root;
+			jcommon::XMLElement *root;
 
 			root = doc.RootElement();
 
@@ -1043,7 +1049,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 		}
 
 		if (strcasecmp(connector->Value(), "causalconnector") == 0) {
-			if (element->HasChildren() == false) {
+			if (element->NoChildren() == true) {
 				JDEBUG(JERROR, "connectorbase has no children\n");
 
 				continue;
@@ -1051,7 +1057,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 
 			std::string id;
 
-			jcommon::XmlAttribute *attr = connector->FirstAttribute();
+			const jcommon::XMLAttribute *attr = connector->FirstAttribute();
 
 			while (attr != NULL) {
 				ATTRIBUTE(id);
@@ -1071,7 +1077,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 
 			causal->id = id;
 
-			jcommon::XmlElement *action = connector->FirstChildElement();
+			jcommon::XMLElement *action = connector->FirstChildElement();
 
 			bool has_condition = false,
 					 has_action = false;
@@ -1081,7 +1087,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 					std::string name,
 						type;
 
-					jcommon::XmlAttribute *attr = connector->FirstAttribute();
+					const jcommon::XMLAttribute *attr = connector->FirstAttribute();
 
 					while (attr != NULL) {
 						ATTRIBUTE(name);
@@ -1112,7 +1118,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 						max,
 						qualifier;
 
-					jcommon::XmlAttribute *attr = action->FirstAttribute();
+					const jcommon::XMLAttribute *attr = action->FirstAttribute();
 
 					while (attr != NULL) {
 						ATTRIBUTE(role);
@@ -1193,7 +1199,7 @@ bool NCLLoader::InnerParserConnectorBase(std::string alias, std::string uri, jco
 						max,
 						qualifier;
 
-					jcommon::XmlAttribute *attr = action->FirstAttribute();
+					const jcommon::XMLAttribute *attr = action->FirstAttribute();
 
 					while (attr != NULL) {
 						ATTRIBUTE(role);

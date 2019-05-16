@@ -64,13 +64,13 @@ int IPTuner::GetSignalStrength()
 		
 void IPTuner::Load()
 {
-	jcommon::XmlDocument doc("./config/channels.xml");
+	jcommon::XMLDocument doc;
 
-	if (!doc.LoadFile()) {
+	if (!doc.LoadFile("./config/channels.xml")) {
 		return;
 	}
 
-	jcommon::XmlElement *root,
+	jcommon::XMLElement *root,
 			   *psg;
 
 	// parser servern node

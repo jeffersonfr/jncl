@@ -62,13 +62,13 @@ int FileTuner::GetSignalStrength()
 		
 void FileTuner::Load()
 {
-	jcommon::XmlDocument doc("./config/channels.xml");
+	jcommon::XMLDocument doc;
 
-	if (!doc.LoadFile()) {
+	if (!doc.LoadFile("./config/channels.xml")) {
 		return;
 	}
 
-	jcommon::XmlElement *root,
+	jcommon::XMLElement *root,
 			   *psg;
 
 	// parser servern node
