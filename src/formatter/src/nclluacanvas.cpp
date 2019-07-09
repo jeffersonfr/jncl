@@ -246,12 +246,12 @@ int NCLLuaCanvasBinding::clip(lua_State *L)
 
 		a->_graphics->SetClip({x, y, w, h});
 	} else {
-		jgui::jregion_t t = a->_graphics->GetClip();
+		jgui::jrect_t<int> t = a->_graphics->GetClip();
 
-		lua_pushnumber(L, t.x);
-		lua_pushnumber(L, t.y);
-		lua_pushnumber(L, t.width);
-		lua_pushnumber(L, t.height);
+		lua_pushnumber(L, t.point.x);
+		lua_pushnumber(L, t.point.y);
+		lua_pushnumber(L, t.size.width);
+		lua_pushnumber(L, t.size.height);
 
 		return 4;
 	}
@@ -286,12 +286,12 @@ int NCLLuaCanvasBinding::color(lua_State *L)
 
 		a->_graphics->SetColor({r1, g1, b1, a1});
 	} else {
-		jgui::Color color = a->_graphics->GetColor();
+		jgui::jcolor_t<float> color = a->_graphics->GetColor();
 
-		lua_pushnumber(L, color.GetRed());
-		lua_pushnumber(L, color.GetGreen());
-		lua_pushnumber(L, color.GetBlue());
-		lua_pushnumber(L, color.GetAlpha());
+		lua_pushnumber(L, color[2]);
+		lua_pushnumber(L, color[1]);
+		lua_pushnumber(L, color[0]);
+		lua_pushnumber(L, color[3]);
 
 		return 4;
 	}
@@ -362,7 +362,7 @@ int NCLLuaCanvasBinding::pixel(lua_State *L)
 
   /*
 	if (lua_gettop(L) > 2) {
-		jgui::Color color = a->_graphics->GetColor();
+		jgui::jcolor_t<float> color = a->_graphics->GetColor();
 
 		int x = (int)luaL_checknumber(L, 2),
 				y = (int)luaL_checknumber(L, 3);
@@ -447,7 +447,7 @@ int NCLLuaCanvasBinding::line(lua_State *L)
 		x2 = (int)luaL_checknumber(L, 4),
 		y2 = (int)luaL_checknumber(L, 5);
 
-	a->_graphics->DrawLine({{x1, y1}, {x2, y2}});
+	a->_graphics->DrawLine({x1, y1}, {x2, y2});
 
 	return 0;
 }
