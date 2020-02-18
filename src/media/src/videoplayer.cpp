@@ -51,7 +51,7 @@
 namespace media {
 
 VideoComponent::VideoComponent(int x, int y, int width, int height):
-	jgui::Component(x, y, width, height)
+	jgui::Component({x, y, width, height})
 {
 	_clear = true;
 	_invalid = false;

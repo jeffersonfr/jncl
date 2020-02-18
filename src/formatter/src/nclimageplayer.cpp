@@ -50,11 +50,11 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	_image = new jgui::BufferedImage(_filename);
 
-	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
+	_component = new jgui::Window({region->width+border, region->height+border}, {region->left+border, region->top+border});
 
 	_theme.SetIntegerParam("window.border", jgui::JCB_EMPTY);
 
-	_component->SetTheme(&_theme);
+	_component->SetTheme(_theme);
 	_component->SetBackgroundVisible(false);
 	_component->SetUndecorated(true);
 	
@@ -67,8 +67,6 @@ NCLImagePlayer::NCLImagePlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 NCLImagePlayer::~NCLImagePlayer()
 {
-  _component->SetTheme(NULL);
-
 	delete _image;
   _image = NULL;
 }

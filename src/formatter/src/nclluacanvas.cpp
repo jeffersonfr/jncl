@@ -55,13 +55,13 @@ NCLLuaCanvasBinding::NCLLuaCanvasBinding(int xp, int yp, int wp, int hp)
 	_image = NULL;
 	_font = NULL;
 	
-	_window = new jgui::Window(xp, yp, wp, hp);
+	_window = new jgui::Window({wp, hp}, {xp, yp});
 
 	_size = _window->GetSize();
 
 	_theme.SetIntegerParam("window.border.type", jgui::JCB_EMPTY);
 
-	_window->SetTheme(&_theme);
+	_window->SetTheme(_theme);
 	_window->SetBackgroundVisible(false);
 	// TODO:: _window->Show(false);
 

@@ -85,18 +85,17 @@ NCLTextPlayer::NCLTextPlayer(NCLEnviroment *env, struct nclmedia_t *media):
 
 	// _filename = _enviroment->GetBaseDirectory() + "/" + _media->src;
 
-	_component = new jgui::Window(region->left+border, region->top+border, region->width+border, region->height+border);
+	_component = new jgui::Window({region->width+border, region->height+border}, {region->left+border, region->top+border});
 
 	_theme.SetIntegerParam("window.border", jgui::JCB_EMPTY);
 
-	_component->SetTheme(&_theme);
+	_component->SetTheme(_theme);
 	_component->SetBackgroundVisible(false);
 	_component->SetUndecorated(true);
 }
 
 NCLTextPlayer::~NCLTextPlayer()
 {
-  _component->SetTheme(NULL);
 }
 
 void NCLTextPlayer::Hide()

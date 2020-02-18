@@ -91,7 +91,7 @@ void IPMediaBank::SetLocator(Locator *locator)
 			{
 				jnetwork::SocketOptions *o = ((jnetwork::DatagramSocket *)_socket)->GetSocketOptions(); 
 
-				o->SetReceiveTimeout(2*500);
+				o->SetReceiveTimeout(std::chrono::seconds(1));
 
 				delete o;
 			}
